@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "description": "A tool for merging and converting Minecraft data and resource packs.",
   "bin": {
-    "zdpack": "./cli.js"
+    "zdpack": "./src/cli.js"
   },
-  "main": "index.js",
-  "author": "Zach K",
+  "main": "./src/index.js",
+  "author": "mathgeniuszach",
   "license": "ISC",
   "dependencies": {
     "cli-progress": "^3.9.0",

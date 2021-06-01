@@ -201,7 +201,8 @@ const bar = new progress.SingleBar({
 });
 
 (async()=>{
-    const tempOut = await fs.mkdir(path.join(tmpdir(), "zdpack-" + nid(10)));
+    const tempOut = path.join(tmpdir(), "zdpack-" + nid(10));
+    await fs.mkdir(tempOut);
 
     if (options.packs) {
         // Scan packs to get progress time and to validate them

@@ -29,7 +29,9 @@ exports.resolveID = (type, id, ext=".json", root="data") => {
  * @param {*} object A javascript object to convert into json.
  */
 exports.add = async (type, id, object, root="data") => {
-    await fs.writeJSON(exports.resolveID(type, id, ".json", root), object);
+    const tid = exports.resolveID(type, id, ".json", root);
+    await fs.ensureFile(tid);
+    await fs.writeJSON(tid, object);
 };
 
 /**
@@ -44,13 +46,15 @@ exports.add = async (type, id, object, root="data") => {
 exports.addTag = async (type, id, values, replace=false) => {
     const tid = exports.resolveID("tags/"+type, id);
     if (replace) {
-        fs.writeJSON(tid, {replace, values});
+        await fs.ensureFile(tid);
+        await fs.writeJSON(tid, {replace, values});
     } else {
         if (fs.existsSync(tid)) {
             const old = await fs.readJSON(tid);
-            fs.writeJSON(tid, {values: [...new Set([...old.values, ...values])]});
+            await fs.writeJSON(tid, {values: [...new Set([...old.values, ...values])]});
         } else {
-            fs.writeJSON(tid, {values});
+            await fs.ensureFile(tid);
+            await fs.writeJSON(tid, {values});
         }
     }
 };

@@ -8,7 +8,7 @@ const fs = require("fs-extra");
 const {tmpdir} = require("os");
 const path = require("path");
 
-program.version("0.1.0");
+program.version("0.1.4");
 program
     .addOption(
         new Option(
@@ -327,17 +327,18 @@ const bar = new progress.SingleBar({
         process.chdir(cwd);
     }
 
+    if (options.output !== "NUL") {
+        // Export to folder or zip
+        if (options.folder) {
+            if (await fs.existsSync(options.output)) await fs.rm(options.output, {recursive: true});
+            await fs.move(tempOut, options.output);
+        } else {
+            // For some reason, this zipping library requires us to move the temp folder once for no reason at all.
+            const id = nid(8);
+            await fs.move(tempOut, id);
+            await zipdir(id, {saveTo: options.output + (isZip ? ".zip" : ".jar")});
 
-    // Export to folder or zip
-    if (options.folder) {
-        if (await fs.existsSync(options.output)) await fs.rm(options.output, {recursive: true});
-        await fs.move(tempOut, options.output);
-    } else {
-        // For some reason, this zipping library requires us to move the temp folder once for no reason at all.
-        const id = nid(8);
-        await fs.move(tempOut, id);
-        await zipdir(id, {saveTo: options.output + (isZip ? ".zip" : ".jar")});
-
-        await fs.rm(id, {recursive: true});
+            await fs.rm(id, {recursive: true});
+        }
     }
 })();

@@ -8,7 +8,7 @@ const fs = require("fs-extra");
 const {tmpdir} = require("os");
 const path = require("path");
 
-program.version("0.1.5");
+program.version("0.1.6");
 program
     .addOption(
         new Option(

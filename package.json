@@ -1,6 +1,6 @@
 {
   "name": "zdpack",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A tool for merging and converting Minecraft data and resource packs.",
   "bin": {
     "zdpack": "./src/cli.js"
@@ -11,6 +11,14 @@
   "keywords": [
     "cli"
   ],
+  "homepage": "https://github.com/xMGZx/zdpack",
+  "bugs": {
+    "url": "https://github.com/xMGZx/zdpack/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xMGZx/zdpack"
+  },
   "dependencies": {
     "cli-progress": "^3.9.0",
     "commander": "^7.2.0",

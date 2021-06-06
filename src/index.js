@@ -25,7 +25,7 @@ exports.resolveID = (type, id, ext=".json", root="data") => {
  * 
  * @param {string} type The folder underneath the namespace folder, like "tags" or "advancements".
  * @param {string} id A namespaced id to be put into the `resolveID()` function. If it does not have an extension the extension is assumed to be ".json"
- * @param {string} root The root folder under the pack folder, "data" for datapacks and "assets" for resource packs.
+ * @param {string} root The root folder under the pack folder, "data" for datapacks and "assets" for resource packs. Defaults to "data".
  * @param {*} object A javascript object to convert into json.
  */
 exports.add = async (type, id, object, root="data") => {
@@ -37,7 +37,7 @@ exports.add = async (type, id, object, root="data") => {
 /**
  * Creates or merges values in a tag (specified by a namespaced id).
  * 
- * @param {string} type The folder underneath the "tags" folder, like "items" or "functions".
+ * @param {string} type The folder underneath the "tags" folder, like "items", "blocks", or "functions".
  * @param {string} id A namespaced id to be put into the `resolveID()` function. If it does not have an extension the extension is assumed to be ".json"
  * @param {string} values A list of strings/objects to use as values in the tag
  * @param {boolean} replace A boolean saying whether or not to replace an existing tag. When set to true (false is default), the `replace` field in the tag will be set and the values will not merge with an existing tag.
@@ -47,7 +47,7 @@ exports.addTag = async (type, id, values, replace=false) => {
     const tid = exports.resolveID("tags/"+type, id);
     if (replace) {
         await fs.ensureFile(tid);
-        await fs.writeJSON(tid, {replace, values});
+        await fs.writeJSON(tid, {replace: true, values});
     } else {
         if (fs.existsSync(tid)) {
             const old = await fs.readJSON(tid);
@@ -57,4 +57,34 @@ exports.addTag = async (type, id, values, replace=false) => {
             await fs.writeJSON(tid, {values});
         }
     }
+};
+
+/**
+ * Registers a command for use in CommandScript files.
+ * If a callback is given, it is called with the id of the function as the first argument and the rest of the arguments of the command and should return a string of mcfunction code.
+ * Selector, NBT, or HJSON arguments will be transformed into a plain object (selectors have an $ field that defines the target as "@[something]"), numbers into numbers, and strings into strings.
+ * @param {string} name The name of the command used to call this command.
+ * @param {Function} callback An optional callback function used to generate mcfunction code as a string based upon command arguments.
+ */
+exports.registerCmd = (name, callback=undefined) => {
+    if (!global.ZDPACK) throw Error("Not inside a datapack (you must run this file from the zdpack command)");
+
+    if (callback == undefined) {
+        global.ZDPACK.cmds[name] = callback;
+    } else {
+        global.ZDPACK.rawcmds.add(name);
+    }
+};
+
+/**
+ * Compiles CommandScript code (CommandScript is a superset of MCFunction) into MCFunction code, optionally with custom commands registered through `registerCmd()`.
+ * @param {string} id A namespaced id to be put into the `resolveID()` function to determine where to output compiled code to. If it does not have an extension the extension is assumed to be ".mcfunction"
+ * @param {string} data A string containing CommandScript code to compile.
+ * @param {boolean} append By default, the compiled code will overwrite the file at the given `id`. Set this to true to instead append to the end of the mcfunction file if it exists.
+ */
+exports.addCmds = async (id, data, append=false) => {
+    const loc = exports.resolveID("functions", id, ".mcfunction");
+
+    // TODO: Begin by parsing CommandScript into a JSON AST.
+    // TODO: Afterwards, read through JSON AST to create mcfunction code.
 };

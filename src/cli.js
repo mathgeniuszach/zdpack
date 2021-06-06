@@ -44,18 +44,18 @@ program
         "-l, --overwrite",
         "By default, when merging packs together, data copied from packs last in the list will not overwrite data copied from a previous pack. This option makes it so data will overwrite previous files. This does not apply to tags, which can be merged with no issues."
     ).option(
-        "-i, --include <folders...>",
-        "A list of folders to merge on top of the final output. Warnings will be shown when overwriting data, and items in these folders will always overwrite items with the same name from left to right. You can use this to include files or overwrite mod metadata to include dependencies."
+        "-i, --include <items...>",
+        "A list of folders/zips to merge on top of the final output. Items in these folders/zips will always overwrite items with the same name from left to right. You can use this to include files or overwrite mod metadata to include dependencies."
     ).option(
         "-j, --js <file>",
-        'A javascript file to run after all datapacks are loaded and include folders merged. The working directory will be set to the root of the datapack before running the script. Use the "zdpack" module for convenience functions you can use to make common files in a datapack.'
+        'A javascript file to be run before the pack is loaded. If a function named "init" is exported, it will be called automatically. If a function named "ready" is exported, it will be run after all other packs/items were merged and included. The working directory will be set to the root of the datapack before running the script or any function. Use the "zdpack" module for convenience functions you can use to make common files in a datapack.'
     );
 
 program.parse();
 const options = program.opts();
 exports.options = options;
 
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+// const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 let msgs = [];
 function addMSG(msg, type="log") {
@@ -70,6 +70,14 @@ exports.showMSGs = showMSGs;
 
 const {getPackFormat, validate, convert} = require("./convert");
 const {merge} = require("./merge");
+
+
+// Load config options
+global.ZDPACK = {
+    rawcmds: new Set(["ability","advancement","agent","allowlist","alwaysday","attribute","ban","ban-ip","banlist","bossbar","camerashake","changesetting","classroommode","clear","clearspawnpoint","clone","closechat","closewebsocket","code","codebuilder","connect","data","datapack","daylock","debug","dedicatedwsserver","defaultgamemode","deop","dialogue","difficulty","effect","enableencryption","enchant","event","execute","experience","fill","fog","forceload","function","gamemode","gamerule","gametest","getchunkdata","getchunks","geteduclientinfo","geteduserverinfo","getlocalplayername","getspawnpoint","gettopsolidblock","give","globalpause","help","immutableworld","item","kick","kill","lesson","list","listd","locate","locatebiome","loot","me","mobevent","msg","music","op","ops","pardon","pardon-ip","particle","permission","playanimation","playsound","publish","querytarget","recipe","reload","remove","replaceitem","ride","save","save-all","save-off","save-on","say","schedule","scoreboard","seed","setblock","setidletimeout","setmaxplayers","setworldspawn","spawnitem","spawnpoint","spectate","spreadplayers","stop","stopsound","structure","summon","tag","takepicture","team","teammsg","teleport","tell","tellraw","testfor","testforblock","testforblocks","tickingarea","time","title","titleraw","tm","toggledownfall","tp","trigger","videostream","w","wb","weather","whitelist","worldborder","worldbuilder","wsserver","xp","achievement","banip","blockdata","broadcast","chunk","clearfixedinv","detect","entitydata","executeasself","home","position","mixer","resupply","setfixedinvslot","setfixedinvslots","setspawn","solid","stats","toggledownfall","transferserver","unban"]),
+    onelinecmds: new Set(["say"]),
+    cmds: {}
+};
 
 
 async function scanItem(packName, item, type) {
@@ -203,6 +211,19 @@ const bar = new progress.SingleBar({
 (async()=>{
     const tempOut = path.join(tmpdir(), "zdpack-" + nid(10));
     await fs.mkdir(tempOut);
+    
+    // Load javascript file
+    let js;
+    if (options.js) {
+        console.log("Loading JavaScript file");
+
+        const script = path.resolve(options.js);
+        const cwd = process.cwd();
+        process.chdir(tempOut);
+        js = require(script);
+        if (js.init) js.init();
+        process.chdir(cwd);
+    }
 
     if (options.packs) {
         // Scan packs to get progress time and to validate them
@@ -316,14 +337,13 @@ const bar = new progress.SingleBar({
     }
 
 
-    // Run javascript file
+    // Run ready function in javascript file
     if (options.js) {
-        console.log("Running JavaScript file");
+        console.log("Loading JavaScript file");
 
-        const script = path.resolve(options.js);
         const cwd = process.cwd();
         process.chdir(tempOut);
-        require(script);
+        if (js.ready) js.ready();
         process.chdir(cwd);
     }
 

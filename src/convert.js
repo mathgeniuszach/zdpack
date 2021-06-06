@@ -1,4 +1,5 @@
 const {addMSG, showMSGs, options} = require("./cli");
+const {addCmds} = require(".");
 
 const HJSON = require("hjson");
 const YAML = require("js-yaml");
@@ -141,10 +142,14 @@ exports.convert = async (pack, type, name, ext, link, outLoc) => {
         } else if (ext === ".yaml" || ext === ".yml") {
             loc = path.parse(outLoc);
             loc = path.join(loc.dir, loc.name) + ".json";
-        } else if (ext === ".mcfunction" || ext === ".cmds") {
+        } else if (ext === ".cmds") {
             loc = path.parse(outLoc);
             loc = path.join(loc.dir, loc.name) + ".mcfunction";
-        } else {
+
+            // There's a separate function solely for converting CommandScript to MCFunction
+            await addCmds(path.resolve(loc), data, false, true);
+            return true;
+        } else if (ext !== ".mcfunction") {
             known = false;
 
             // Unknown file types just get copied as is

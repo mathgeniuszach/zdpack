@@ -2,6 +2,8 @@ const fs = require("fs-extra");
 const path = require("path");
 const JSZip = require("jszip");
 
+// TODO: utilize options from packer.js
+
 async function copy(src, dst) {
     const stats = await fs.stat(src);
     if (stats.isDirectory()) {

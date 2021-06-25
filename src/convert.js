@@ -1,4 +1,4 @@
-const {addMSG, showMSGs, options} = require("./cli");
+const packer = require("./packer");
 const {addCmds} = require(".");
 
 const HJSON = require("hjson");
@@ -113,7 +113,7 @@ exports.validate = async (pack, type, name, ext, link) => {
         }
         return true;
     } catch (err) {
-        addMSG(`"${type}" item "${name}" from pack "${pack}" is invalid; ${err}`, "error");
+        packer.addMSG(`"${type}" item "${name}" from pack "${pack}" is invalid; ${err}`, "error");
         return false;
     }
 };
@@ -147,7 +147,7 @@ exports.convert = async (pack, type, name, ext, link, outLoc) => {
             loc = path.join(loc.dir, loc.name) + ".mcfunction";
 
             // There's a separate function solely for converting CommandScript to MCFunction
-            await addCmds(path.resolve(loc), data, false, true);
+            await addCmds(path.resolve(loc), data);
             return true;
         } else if (ext !== ".mcfunction") {
             known = false;
@@ -185,12 +185,12 @@ exports.convert = async (pack, type, name, ext, link, outLoc) => {
             if (safe) {
                 await fs.writeFile(loc, data);
             } else {
-                if (options.overwrite) {
-                    addMSG(`"${type}" item "${name}" from pack "${pack}" is overwriting existing file`, "log");
+                if (packer.options.overwrite) {
+                    packer.addMSG(`"${type}" item "${name}" from pack "${pack}" is overwriting existing file`, "log");
                     await fs.rm(loc, {recursive: true});
                     await fs.writeFile(loc, data);
                 } else {
-                    addMSG(`"${type}" item "${name}" from pack "${pack}" conflicts with existing file, ignoring`, "log");
+                    packer.addMSG(`"${type}" item "${name}" from pack "${pack}" conflicts with existing file, ignoring`, "log");
                 }
             }
         } else {
@@ -202,7 +202,7 @@ exports.convert = async (pack, type, name, ext, link, outLoc) => {
 
         return true;
     } catch (err) {
-        addMSG(`Failed to convert "${type}" item "${name}" from pack "${pack}", skipping; ${err}`, "error");
+        packer.addMSG(`Failed to convert "${type}" item "${name}" from pack "${pack}", skipping; ${err}`, "error");
         return false;
     }
 };

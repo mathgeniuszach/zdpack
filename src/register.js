@@ -58,8 +58,8 @@ registerCmd("$", async (...args) => {
         // The value is a number, so we do specific commands
         switch (args[0]) {
             case "=": return `scoreboard players set ${v} ${data}`;
-            case "+=": return `scoreboard players add ${v} ${data}`;
-            case "-=": return `scoreboard players remove ${v} ${data}`;
+            case "+=": return `scoreboard players ${data < 0 ? "remove" : "add"} ${v} ${Math.abs(data)}`;
+            case "-=": return `scoreboard players ${data < 0 ? "add" : "remove"} ${v} ${Math.abs(data)}`;
             
             case "*=": case "/=": case "%=": case "<": case ">":
                 // In these cases minecraft doesn't support constant values, so we need to use a variable

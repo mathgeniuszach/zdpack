@@ -1,6 +1,6 @@
 {
   "name": "zdpack",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A tool for merging and converting Minecraft data and resource packs.",
   "bin": {
     "zdpack": "./src/cli.js"

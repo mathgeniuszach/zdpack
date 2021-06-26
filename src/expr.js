@@ -158,7 +158,7 @@ async function parseExpr(ast, reset=true) {
                 for (let i = 0; i < data.length; i++) {
                     let a = data[i];
                     let b = data[i+1];
-                    const op = ast.ops[i];
+                    let op = ast.ops[i];
 
                     if (typeof a == "number") {
                         if (typeof b == "number") {
@@ -188,6 +188,8 @@ async function parseExpr(ast, reset=true) {
                         if (typeof b == "number") {
                             // We switch a and b around
                             [a, b] = [b, a];
+                            // This also means we must flip the operator around if necessary
+                            op = op.replace("<", "\0").replace(">", "<").replace("\0", ">");
                         } else {
                             // Both are not numbers
                             switch (op) {

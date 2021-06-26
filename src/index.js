@@ -15,8 +15,9 @@ const state = {
     consts: new Set([-1]),
     // Dummy variables to initialize
     vars: new Set(["__temp__"]),
-    // n value for compiled expressions
+    // n and x value for compiled expressions (n is reset, x is not)
     n: 0,
+    x: 0,
     // randomly generated namespace to put auto-generated functions in so they don't conflict with anything.
     rng: "f" + nid(10),
 
@@ -37,7 +38,7 @@ class Selector {
 
         const entries = Object.entries(this.args ?? []);
         if (entries.length > 0) {
-            return "@" + this.target + "[" + entries.map((s) => `${s[0]}:${stringify(s[1])}`).join() + "]";
+            return "@" + this.target + "[" + entries.map((s) => `${s[0]}=${stringify(s[1], true, s[0] == "scores")}`).join() + "]";
         } else {
             return "@" + this.target;
         }
@@ -79,16 +80,21 @@ exports.JointItem = JointItem;
  * Stringifies something for use in MCFunction code.
  * @param {*} e The thing to stringify
  * @param {boolean} quote Whether or not to quote quoted strings
+ * @param {boolean} useEqual Whether or not dictionaries should use equal signs in them instead of colons
  * @returns {string} A string to use in MCFunction code.
  */
-function stringify(e, quote=true) {
+function stringify(e, quote=true, useEqual=false) {
     if (e instanceof String) {
         if (quote) return JSON.stringify(e);
         else return e;
     } else if (Array.isArray(e)) {
         return "[" + e.map((x) => stringify(x)).join() + "]";
-    } else if (typeof e == "object" && !(e instanceof Selector)) {
-        return "{" + Object.entries(e).map((s) => s[0].includes(" ") ? `"${s[0]}":${stringify(s[1])}` : `${s[0]}:${stringify(s[1])}`).join(",") + "}";
+    } else if (typeof e == "object" && !(e instanceof Selector || e instanceof Range || e instanceof JointItem)) {
+        if (useEqual) {
+            return "{" + Object.entries(e).map((s) => s[0].includes(" ") ? `"${s[0]}":${stringify(s[1])}` : `${s[0]}=${stringify(s[1])}`).join(",") + "}";
+        } else {
+            return "{" + Object.entries(e).map((s) => s[0].includes(" ") ? `"${s[0]}":${stringify(s[1])}` : `${s[0]}:${stringify(s[1])}`).join(",") + "}";
+        }
     } else {
         return String(e).replace(/[\r\n]+/g, "");
     }

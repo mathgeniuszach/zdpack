@@ -74,19 +74,19 @@ registerCmd("$", async (...args) => {
 });
 
 const conditional = async (...args) => {
-    if (args.length < 2 || /* 5 */ 3 < args.length) throw Error(`invalid arguments for ${this ? "if" : "unless"} command`);
+    if (args.length < 2 || 5 < args.length) throw Error(`invalid arguments for ${this ? "if" : "unless"} command`);
 
-    // Check for else statement (not doing this because it is possible the condition will change and I'd need to cache the condition)
-    // let elseCode = null;
-    // let elseLoc = null;
-    // let elseOutCmd = null;
-    // if (args[args.length - 2] == "else") {
-    //     elseCode = await compileCmds(args.pop());
-    //     elseLoc = `${state.rng}:else${state.n}`;
-    //     elseOutCmd = elseCode.length == 1 ? elseCode[0] : `function ${elseLoc}`;
+    // Check for else statement (if found, the condition is cached)
+    let elseCode = null;
+    let elseLoc = null;
+    let elseOutCmd = null;
+    if (args[args.length - 2] == "else") {
+        elseCode = await compileCmds(args.pop());
+        elseLoc = `${state.rng}:else${state.n}`;
+        elseOutCmd = elseCode.length == 1 ? elseCode[0] : `function ${elseLoc}`;
 
-    //     args.pop();
-    // }
+        args.pop();
+    }
 
     // Get code to put in external function
     const code = await compileCmds(args[args.length - 1]);
@@ -101,21 +101,40 @@ const conditional = async (...args) => {
                 // If the number is truthy, we just run the function (but not the else function)
                 // If it is falsy, we run only the else function (if it exists)
                 if (args[0]) cmd = outCmd;
+                else if (elseOutCmd) cmd = elseOutCmd;
                 break;
             case "string":
                 // Variable
-                cmd = `execute ${this ? "unless" : "if"} score @s ${args[0]} matches 0 run ${outCmd}`;
+                if (elseOutCmd) {
+                    // Else command exists, so we must cache the value of the variable
+                    cmd = [`execute store success score c${state.x} __temp__ ${this ? "unless" : "if"} score @s ${args[0]} matches 0`];
+                } else {
+                    cmd = `execute ${this ? "unless" : "if"} score @s ${args[0]} matches 0 run ${outCmd}`;
+                }
                 break;
             case "object":
                 if (args[0] instanceof Selector) {
-                    // TODO: implement predicates and other things through selectors
-                    cmd = `execute ${this ? "if" : "unless"} entity ${args[0]} run ${outCmd}`;
+                    if (elseOutCmd) {
+                        // Else command exists, so we must cache the value of the variable
+                        cmd = [`execute store success score c${state.x} __temp__ ${this ? "if" : "unless"} entity ${args[0]}`];
+                    } else {
+                        cmd = `execute ${this ? "if" : "unless"} entity ${args[0]} run ${outCmd}`;
+                    }
                 } else {
                     let expr = await parseExpr(args[0]);
                     if (typeof expr == "number") {
                         if (expr) cmd = outCmd;
+                        else if (elseOutCmd) cmd = elseOutCmd;
                     } else {
-                        cmd = `${expr[0]}\nexecute ${this ? "unless" : "if"} score ${expr[1]} matches 0 run ${outCmd}`;
+                        if (elseOutCmd) {
+                            // Else command exists, so we must cache the value of the variable
+                            cmd = [
+                                expr[0],
+                                `execute store success score c${state.x} __temp__ ${this ? "unless" : "if"} score ${expr[1]} matches 0`,
+                            ];
+                        } else {
+                            cmd = `${expr[0]}\nexecute ${this ? "unless" : "if"} score ${expr[1]} matches 0 run ${outCmd}`;
+                        }
                     }
                 }
                 break;
@@ -129,7 +148,17 @@ const conditional = async (...args) => {
 
     // Finally add code
     if (cmd) {
-        await addRawCmds(loc, code);
+        if (elseOutCmd) {
+            if (elseCode.length > 1) await addRawCmds(elseLoc, elseCode);
+            if (Array.isArray(cmd)) {
+                cmd.push(
+                    `execute if score c${state.x} __temp__ matches 1 run ${outCmd}`,
+                    `execute unless score c${state.x} __temp__ matches 1 run ${elseOutCmd}`
+                );
+                state.x++;
+            }
+        }
+        if (code.length > 1) await addRawCmds(loc, code);
         return cmd;
     } else {
         return [];

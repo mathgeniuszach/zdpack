@@ -99,7 +99,7 @@ list
         return unroll(null, args, 1);
     }
 dict
-    = "{" __? vals:(__? (string / [A-Za-z0-9$_\-]) _? [:=] __? (val / selector) ","?)* __? end:"}"? {
+    = "{" __? vals:(__? (string / $([A-Za-z0-9$_\-]+)) _? [:=] __? (val / selector) ","?)* __? end:"}"? {
         if (!end) expected(String.fromCharCode(123) + " to end dictionary");
         
         const obj = {};
@@ -150,8 +150,9 @@ val
     / generic
 
 selargs
-    = ends:("[" (__? [A-Za-z0-9$_\-] _? [:=] _? val ","?)* __? "]"?) {
+    = ends:("[" (__? $([A-Za-z0-9$_\-]+) _? [:=] _? val ","?)* __? "]"?) {
         if (!ends[ends.length-1]) expected('] to end selector args');
+        return ends;
     }
 selector
     = "@" t:$([a-zA-Z0-9_]+) ends:selargs? {

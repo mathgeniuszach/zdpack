@@ -1,10 +1,10 @@
-const fs = require("fs-extra");
-const path = require("path");
-const JSZip = require("jszip");
+import fs from "fs-extra";
+import path from "path";
+import JSZip from "jszip";
 
 // TODO: utilize options from packer.js
 
-async function copy(src, dst) {
+export async function copy(src: string, dst: string) {
     const stats = await fs.stat(src);
     if (stats.isDirectory()) {
         if (fs.existsSync(dst) && fs.statSync(dst).isFile()) await fs.rm(dst);
@@ -22,7 +22,7 @@ async function copy(src, dst) {
     }
 }
 
-exports.merge = async (payload, bar, loc, ...items) => {
+export async function merge(payload: {[key: string]: any}, bar: any, loc: string, ...items: string[]) {
     // Ensure that the output directory is a folder
     if (fs.existsSync(loc) && fs.statSync(loc).isFile()) await fs.rm(loc);
     await fs.ensureDir(loc);

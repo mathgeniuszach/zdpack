@@ -1,4 +1,4 @@
-const {registerCmd, addRawCmds, compileCmds, stringify, parseExpr, state, Selector} = require(".");
+import {registerCmd, addRawCmds, compileCmds, stringify, parseExpr, state, Selector} from "./index";
 
 // The say command, by default works generally how you'd expect, except newline characters create more than one say command
 registerCmd("say", (...args) => {
@@ -93,7 +93,7 @@ const conditional = async (...args) => {
     const loc = `${state.rng}:${this ? "if" : "unl"}${state.n++}`;
     const outCmd = code.length == 1 ? code[0] : `function ${loc}`;
 
-    let cmd = "";
+    let cmd: string | string[] = "";
     if (args.length == 2) {
         // There's only one argument to check for
         switch (typeof args[0]) {
@@ -158,7 +158,7 @@ const conditional = async (...args) => {
                 state.x++;
             }
         }
-        if (code.length > 1) await addRawCmds(loc, code);
+        if (code.length > 1) await addRawCmds(loc, code.join("\n"));
         return cmd;
     } else {
         return [];

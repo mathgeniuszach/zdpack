@@ -10,6 +10,7 @@
     },
     "rules": {
         "no-unused-vars": "off",
+        "no-unsafe-finally": "off",
         "semi": "error"
     }
 }

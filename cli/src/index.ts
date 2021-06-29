@@ -1,16 +1,15 @@
-// TODO: API for easily creating datapack files
-
-const fs = require("fs-extra");
-const nid = require("nid");
-const path = require("path");
-const pegjs = require("pegjs");
-const pegutil = require("pegjs-util");
+import fs from "fs-extra";
+import nid from "nid";
+import path from "path";
+import pegjs from "pegjs";
 
 // Generate the CommandScript parser
 const parser = pegjs.generate(fs.readFileSync(path.resolve(__dirname, "cmds.pegjs"), "utf-8"));
 
+
+
 // Options and compiler state
-const state = {
+export const state = {
     // Constant numbers that need a scoreboard value set for them (since minecraft doesn't let you do constant multiplication and such)
     consts: new Set([-1]),
     // Dummy variables to initialize
@@ -25,15 +24,17 @@ const state = {
     cmds: new Set(["ability","advancement","agent","allowlist","alwaysday","attribute","ban","ban-ip","banlist","bossbar","camerashake","changesetting","classroommode","clear","clearspawnpoint","clone","closechat","closewebsocket","code","codebuilder","connect","data","datapack","daylock","debug","dedicatedwsserver","defaultgamemode","deop","dialogue","difficulty","effect","enableencryption","enchant","event","execute","experience","fill","fog","forceload","function","gamemode","gamerule","gametest","getchunkdata","getchunks","geteduclientinfo","geteduserverinfo","getlocalplayername","getspawnpoint","gettopsolidblock","give","globalpause","help","immutableworld","item","kick","kill","lesson","list","listd","locate","locatebiome","loot","me","mobevent","msg","music","op","ops","pardon","pardon-ip","particle","permission","playanimation","playsound","publish","querytarget","recipe","reload","remove","replaceitem","ride","save","save-all","save-off","save-on","say","schedule","scoreboard","seed","setblock","setidletimeout","setmaxplayers","setworldspawn","spawnitem","spawnpoint","spectate","spreadplayers","stop","stopsound","structure","summon","tag","takepicture","team","teammsg","teleport","tell","tellraw","testfor","testforblock","testforblocks","tickingarea","time","title","titleraw","tm","toggledownfall","tp","trigger","videostream","w","wb","weather","whitelist","worldborder","worldbuilder","wsserver","xp","achievement","banip","blockdata","broadcast","chunk","clearfixedinv","detect","entitydata","executeasself","home","position","mixer","resupply","say","setfixedinvslot","setfixedinvslots","setspawn","solid","stats","toggledownfall","transferserver","unban"]),
     callbacks: {},
 };
-exports.state = state;
 
-class Selector {
-    constructor(target, args=null) {
+export class Selector {
+    target: string
+    args: any[]
+
+    constructor(target: string, args: any[] = null) {
         this.target = target;
         this.args = args;
     }
 
-    toString() {
+    toString(): string {
         if (this.target.length > 1 && !this.args) return this.target;
 
         const entries = Object.entries(this.args ?? []);
@@ -44,28 +45,33 @@ class Selector {
         }
     }
 }
-exports.Selector = Selector;
 
-class Range {
-    constructor(min, max) {
-        this.min = parseFloat(min ?? -Infinity);
-        this.max = parseFloat(max ?? Infinity);
+export class Range {
+    min: number
+    max: number
+
+    constructor(min: number, max: number) {
+        this.min = parseFloat((min ?? -Infinity) as unknown as string);
+        this.max = parseFloat((max ?? Infinity) as unknown as string);
     }
 
-    toString() {
+    toString(): string {
         return `${isFinite(this.min) ? this.min : ""}..${isFinite(this.max) ? this.max : ""}`;
     }
 }
-exports.Range = Range;
 
-class JointItem {
-    constructor(item, state, nbt) {
+export class JointItem {
+    item: string
+    state: {[key: string]: any}
+    nbt: {[key: string]: any}
+
+    constructor(item: string, state: {[key: string]: any}, nbt: {[key: string]: any}) {
         this.item = item;
         this.state = state;
         this.nbt = nbt;
     }
 
-    toString() {
+    toString(): string {
         const s = [this.item];
 
         if (this.state) s.push("[" + Object.entries(this.state).map((s) => `${s[0]}:${stringify(s[1])}`).join() + "]");
@@ -74,7 +80,6 @@ class JointItem {
         return s.join("");
     }
 }
-exports.JointItem = JointItem;
 
 /**
  * Stringifies something for use in MCFunction code.
@@ -83,10 +88,10 @@ exports.JointItem = JointItem;
  * @param {boolean} useEqual Whether or not dictionaries should use equal signs in them instead of colons
  * @returns {string} A string to use in MCFunction code.
  */
-function stringify(e, quote=true, useEqual=false) {
+export function stringify(e: any, quote: boolean = true, useEqual: boolean = false): string {
     if (e instanceof String) {
         if (quote) return JSON.stringify(e);
-        else return e;
+        else return String(e);
     } else if (Array.isArray(e)) {
         return "[" + e.map((x) => stringify(x)).join() + "]";
     } else if (typeof e == "object" && !(e instanceof Selector || e instanceof Range || e instanceof JointItem)) {
@@ -99,7 +104,6 @@ function stringify(e, quote=true, useEqual=false) {
         return String(e).replace(/[\r\n]+/g, "");
     }
 }
-exports.stringify = stringify;
 
 /**
  * Takes a namespaced id (e.g. `minecraft:thing/another/third`) and converts it to a full path relative to the current working directory (e.g. `data/minecraft/{type}/thing/another/third.json`).
@@ -110,55 +114,51 @@ exports.stringify = stringify;
  * @param {string} root The root folder under the pack folder, "data" for datapacks and "assets" for resource packs.
  * @returns {string} A properly formatted path generated from the id.
  */
-function resolveID(type, id, ext=".json", root="data") {
+export function resolveID(type: string, id: string, ext: string = ".json", root: string = "data"): string {
     if (!/^([a-z][a-z0-9_]*:)?[a-z][a-z0-9_]*(\/[a-z][a-z0-9_]*)*(\.[a-z][a-z0-9_]*)?$/.test(id)) throw new Error(`invalid namespaced id "${id}"`);
 
     const parts = id.split(/:/g);
     if (parts.length < 2) parts.unshift("minecraft");
     return path.join(root, parts[0], type, parts[1]) + (path.extname(id) ? "" : ext);
 }
-exports.resolveID = resolveID;
 
 /**
  * Writes some JSON data to a file in the datapack pointed to by a namespaced id. If the file already exists, it will be overwriten.
  * 
  * @param {string} type The folder underneath the namespace folder, like "tags" or "advancements".
  * @param {string} id A namespaced id to be put into the `resolveID()` function. If it does not have an extension the extension is assumed to be ".json"
- * @param {string} root The root folder under the pack folder, "data" for datapacks and "assets" for resource packs. Defaults to "data".
  * @param {*} object A javascript object to convert into json.
+ * @param {string} root The root folder under the pack folder, "data" for datapacks and "assets" for resource packs. Defaults to "data".
  */
-async function add(type, id, object, root="data") {
+export async function add(type: string, id: string, object: any, root: string = "data") {
     const tid = resolveID(type, id, ".json", root);
     await fs.ensureFile(tid);
     await fs.writeJSON(tid, object);
 }
-exports.add = add;
 
 /**
  * Creates or merges values in a tag (specified by a namespaced id).
  * 
  * @param {string} type The folder underneath the "tags" folder, like "items", "blocks", or "functions".
  * @param {string} id A namespaced id to be put into the `resolveID()` function. If it does not have an extension the extension is assumed to be ".json"
- * @param {string} values A list of strings/objects to use as values in the tag
+ * @param {string[]} values A list of strings/objects to use as values in the tag
  * @param {boolean} replace A boolean saying whether or not to replace an existing tag. When set to true (false is default), the `replace` field in the tag will be set and the values will not merge with an existing tag.
- * @param {*} object A javascript object to convert into json.
  */
-async function addTag(type, id, values, replace=false) {
+export async function addTag(type: string, id: string, values: string[], replace: boolean = false) {
     const tid = resolveID("tags/"+type, id);
     if (replace) {
         await fs.ensureFile(tid);
         await fs.writeJSON(tid, {replace: true, values});
     } else {
         if (fs.existsSync(tid)) {
-            const old = await fs.readJSON(tid);
-            await fs.writeJSON(tid, {values: [...new Set([...old.values, ...values])]});
+            const old: {values: string[]} = await fs.readJSON(tid);
+            await fs.writeJSON(tid, {values: [...new Set<string>([...old.values, ...values])]});
         } else {
             await fs.ensureFile(tid);
             await fs.writeJSON(tid, {values});
         }
     }
 }
-exports.addTag = addTag;
 
 /**
  * Registers a command for use in CommandScript files.
@@ -167,7 +167,7 @@ exports.addTag = addTag;
  * @param {string} name The name of the command to register.
  * @param {Function} callback An optional callback function used to generate mcfunction code as a string based upon command arguments.
  */
-function registerCmd(name, callback=undefined) {
+export function registerCmd(name: string, callback: (...args: any) => Promise<string | string[]> | string | string[] = undefined) {
     state.cmds.add(name);
     if (callback == undefined) {
         delete state.callbacks[name];
@@ -175,24 +175,22 @@ function registerCmd(name, callback=undefined) {
         state.callbacks[name] = callback;
     }
 }
-exports.registerCmd = registerCmd;
 
 /**
  * Unregisters a registered command for use in CommandScript files.
  * @param {string} name The name of the command to unregister.
  */
-function unregisterCmd(name) {
+export function unregisterCmd(name: string) {
     delete state.callbacks[name];
     state.cmds.delete(name);
 }
-exports.unregisterCmd = unregisterCmd;
 
 /**
  * Compiles the ast of a command into a list of strings to use as mcfunction code.
  * @param {object} ast CommandScript AST of a single command.
  * @returns {Promise<string[]>} a list of strings of mcfunction code
  */
-async function compileCmd(ast) {
+export async function compileCmd(ast: {[key: string]: any}): Promise<string[]> {
     if (ast.type != "cmd") throw TypeError("given object is not a command ast");
 
     if (ast.cmd == "execute") {
@@ -226,7 +224,6 @@ async function compileCmd(ast) {
     
     throw Error(`command "${ast.cmd}" is not registered`);
 }
-exports.compileCmd = compileCmd;
 
 
 /**
@@ -234,9 +231,9 @@ exports.compileCmd = compileCmd;
  * @param {string | object} data
  * @returns {Promise<string[]>} a list of strings of mcfunction code
  */
-async function compileCmds(data) {
+export async function compileCmds(data: string | {[key: string]: any}[]): Promise<string[]> {
     // Begin by parsing CommandScript into a JSON AST.
-    const ast = typeof data == "string" ? parseCmds(data) : data;
+    const ast: {[key: string]: any}[] = typeof data == "string" ? parseCmds(data) : data;
 
     // TODO: try catch and give line number
     // Afterwards, read through JSON AST to create mcfunction code.
@@ -255,14 +252,13 @@ async function compileCmds(data) {
     // ));
     return code.join("\n").replace(/\n{2,}/, "\n").trim().split("\n");
 }
-exports.compileCmds = compileCmds;
 
 /**
  * Parses CommandScript code into a JSON AST and returns the AST.
  * @param {string} data A string containing CommandScript code to parse.
  * @returns {object} JSON AST
  */
-function parseCmds(data) {
+export function parseCmds(data: string): {[key: string]: any}[] {
     // Cleanup lines before parsing
     const pdata = data.replace(/\r\n|\r/g, "\n").replace(/[ \t]+\n\s+\.[ \t]+/g, " ") + "\n";
 
@@ -270,7 +266,6 @@ function parseCmds(data) {
         Selector, Range, JointItem
     });
 }
-exports.parseCmds = parseCmds;
 
 /**
  * Compiles CommandScript code (CommandScript is a superset of MCFunction) into MCFunction code, optionally with custom commands registered through `registerCmd()`.
@@ -279,8 +274,8 @@ exports.parseCmds = parseCmds;
  * @param {boolean} append By default, the compiled code will overwrite the file at the given `id`. Set this to true to instead append to the end of the mcfunction file if it exists.
  * @param {boolean} raw Whether or not data is raw mcfunction code rather than CommandScript. Defaults to false.
  */
-async function addCmds(id, data, append=false, raw=false) {
-    const code = raw ? data : compileCmds(data).join("\n");
+export async function addCmds(id: string, data: string | {[key: string]: any}[], append: boolean = false, raw: boolean = false) {
+    const code = raw ? data : (await compileCmds(data)).join("\n");
 
     // Finally write the code to the file
     const loc = resolveID("functions", id, ".mcfunction");
@@ -291,21 +286,19 @@ async function addCmds(id, data, append=false, raw=false) {
         await fs.appendFile(loc, "\n" + code + "\n");
     }
 }
-exports.addCmds = addCmds;
 
 /**
  * Shorthand for `addCmds(id, data, append, true)`, append defaults to false
  */
-async function addRawCmds(id, data, append=false) {
+export async function addRawCmds(id: string, data: string, append: boolean = false) {
     await addCmds(id, data, append, true);
 }
-exports.addRawCmds = addRawCmds;
 
 /**
  * Writes necessary data to function tags as well as generating a load function with certain variable creation.
  * There's no need to call this manually if you're using zdpack.
  */
-async function finalize() {
+export async function finalize() {
     // Create load function to auto-create necessary variables
     const loc = `${state.rng}:load`;
     await addTag("functions", "minecraft:load", [loc]);
@@ -314,8 +307,11 @@ async function finalize() {
         [...state.consts].map((v) => `scoreboard players set ${v} __temp__ ${v}`).join("\n"),
     );
 }
-exports.finalize = finalize;
 
-exports.parseExpr = require("./expr").parseExpr;
-exports.pack = require("./packer").pack;
+import {parseExpr as p1} from "./expr";
+import {pack as p2} from "./packer";
+export const parseExpr = p1;
+export const pack = p2;
 require("./register");
+
+export default {state, Selector, Range, JointItem, stringify, resolveID, add, addTag, registerCmd, unregisterCmd, compileCmd, compileCmds, parseCmds, addCmds, addRawCmds, finalize, parseExpr, pack};

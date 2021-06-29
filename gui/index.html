@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+
+        <title>zdpack gui</title>
+
+        <style>
+            #options {
+                display: grid;
+                grid-template-columns: 125px 1fr;
+                row-gap: 5px;
+            }
+            textarea {
+                resize: vertical;
+            }
+            label {
+                user-select: none;
+            }
+
+            #checkboxes {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+
+                margin: 5px 0px;
+            }
+            #checkboxes label {
+                margin-right: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="options">
+            <label for="type" title="The format to output the final datapack in.">Output Type:</label>
+            <select id="type" title="The format to output the final datapack in.">
+                <option value="data">data</option>
+                <option value="assets">assets</option>
+                <option value="pack">pack</option>
+                <option value="forge">forge</option>
+                <option value="fabric">fabric</option>
+                <option value="mod">mod</option>
+            </select>
+    
+            <label for="output" title='"loc" is the full path and name of a folder location to output too, without an extension. Use NUL to mean "do not output to any folder", which is useful for validating json files. If the folder already exists, it will be deleted. Defaults to "pack".'>Output Location:</label>
+            <input id="output" title='"loc" is the full path and name of a folder location to output too, without an extension. Use NUL to mean "do not output to any folder", which is useful for validating json files. If the folder already exists, it will be deleted. Defaults to "pack".'>
+    
+            <label for="mcv" title="Minecraft version the output pack is designed for. Use a format like 1.16 or 1.16.0 or 1.16.4.">Minecraft Version:</label>
+            <input id="mcv" title="Minecraft version the output pack is designed for. Use a format like 1.16 or 1.16.0 or 1.16.4.">
+    
+            <label for="id" title="The mod id to use if the output is a mod. If this is not specified, the id is generated from the output folder.">Mod ID:</label>
+            <input id="id" title="The mod id to use if the output is a mod. If this is not specified, the id is generated from the output folder.">
+    
+            <label for="desc">Description:</label>
+            <textarea id="desc"></textarea>
+
+            <label for="js" title='A javascript file to be run before the pack is loaded. If a function named "init" is exported, it will be called automatically. If a function named "ready" is exported, it will be run after all other packs/items were merged and included. The working directory will be set to the root of the datapack before running the script or any function. Use the "zdpack" module for convenience functions you can use to make common files in a datapack.'>JS Build File:</label>
+            <input id="js" title='A javascript file to be run before the pack is loaded. If a function named "init" is exported, it will be called automatically. If a function named "ready" is exported, it will be run after all other packs/items were merged and included. The working directory will be set to the root of the datapack before running the script or any function. Use the "zdpack" module for convenience functions you can use to make common files in a datapack.'>
+        </div>
+
+        <div id="checkboxes">
+            <input type="checkbox" id="folder">
+            <label for="folder">Output as Folder</label>
+    
+            <input type="checkbox" id="overwrite">
+            <label for="overwrite">Overwrite Mode</label>
+        </div>
+
+        <hr>
+        <div class="list" id="packs"></div>
+        <hr>
+        <div class="list" id="include"></div>
+    </body>
+</html>

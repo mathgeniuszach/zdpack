@@ -1,19 +1,19 @@
-const {state, Selector, compileCmd} = require(".");
+import {state, Selector, compileCmd} from "./index";
 const modInt = (a) => (a + 2147483648) % 4294967296 - 2147483648;
 
 /**
  * Parses an expression AST into either a series of commands and the scoreboard variable output, or into just a number.
  * @param {object} ast an expression AST to parse
- * @param {boolean} reset Whether or not to reset the internal temporary variable counter (defaults to true). You typically don't need to worry about this
+ * @param {boolean} reset Whether or not to reset the internal temporary variable counter (defaults to true). You typically don't need to worry about setting this to false.
  * @returns {Promise<[string, string] | number>} Either a series of commands and the scoreboard variable output or the calculated value of the expression. Keep in mind that the number returned could be a non-integer value.
  */
-async function parseExpr(ast, reset=true) {
+export async function parseExpr(ast: {[key: string]: any}, reset: boolean = true) {
     if (reset) state.n = 0;
     if (ast == null) return 0;
     if (typeof ast != "object") return ast;
 
-    let data = [];
-    let edata = [];
+    let data: any = [];
+    let edata: any = [];
     let code = [];
 
     // This expression is a special one
@@ -434,4 +434,3 @@ async function parseExpr(ast, reset=true) {
 
     return [code.join("\n").trim(), `e${state.n++} __temp__`];
 }
-exports.parseExpr = parseExpr;

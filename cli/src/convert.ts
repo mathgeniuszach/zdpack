@@ -1,21 +1,23 @@
-const packer = require("./packer");
-const {addCmds} = require(".");
+import JSZip from "jszip";
 
-const HJSON = require("hjson");
-const YAML = require("js-yaml");
-const fs = require("fs-extra");
-const path = require("path");
-const JSZip = require("jszip");
-const assert = require("assert");
+import HJSON from "hjson";
 
-const {isEqual} = require("lodash");
+import YAML from "js-yaml";
+import fs from "fs-extra";
+import path from "path";
+import assert from "assert";
+
+import {isEqual} from "lodash";
+
+import {addCmds} from "./index";
+import {addMSG, options} from "./packer";
 
 /**
  * Converts a Minecraft version string to a pack format number
  * @param {string} version A Minecraft version string
  * @returns {number} The pack format number corresponding to the Minecraft version.
  */
-exports.getPackFormat = (version) => {
+export function getPackFormat(version: string): number {
     const parts = version.split(".");
     const minor = parseInt(parts[1]);
 
@@ -38,7 +40,7 @@ exports.getPackFormat = (version) => {
         case 15:
             return 5;
         case 16:
-            if (parseInt(parts[2] || 0) <= 1) return 5;
+            if ((parseInt(parts[2]) || 0) <= 1) return 5;
             else return 6;
         case 17:
             return 7;
@@ -53,7 +55,7 @@ exports.getPackFormat = (version) => {
     }
 };
 
-async function read(link, ext) {
+async function read(link: string | JSZip.JSZipObject, ext: string): Promise<{[key: string]: any} | string> {
     let data = null;
     if (ext === ".hjson" || ext === ".json") {
         data = HJSON.parse(
@@ -85,11 +87,11 @@ async function read(link, ext) {
  * @param {string} name A name/path of the file to show on error.
  * @param {string} ext The extension of the file.
  * @param {string | JSZip.JSZipObject} link Either a path pointing to a file to read or a zip object to read.
- * @returns {boolean} Whether or not the file is valid.
+ * @returns {Promise<boolean>} Whether or not the file is valid.
  */
-exports.validate = async (pack, type, name, ext, link) => {
+export async function validate(pack: string, type: string, name: string, ext: string, link: string | JSZip.JSZipObject): Promise<boolean> {
     try {
-        let data = await read(link, ext);
+        let data: {[key: string]: any} = await read(link, ext) as {[key: string]: any};
 
         // Only attempt validation of data if it could be gathered
         if (data) {
@@ -113,7 +115,7 @@ exports.validate = async (pack, type, name, ext, link) => {
         }
         return true;
     } catch (err) {
-        packer.addMSG(`"${type}" item "${name}" from pack "${pack}" is invalid; ${err}`, "error");
+        addMSG(`"${type}" item "${name}" from pack "${pack}" is invalid; ${err}`, "error");
         return false;
     }
 };
@@ -127,7 +129,7 @@ exports.validate = async (pack, type, name, ext, link) => {
  * @param {string} outLoc A path to the output location of this file.
  * @returns {boolean} Whether or not the file was successfully converted.
  */
-exports.convert = async (pack, type, name, ext, link, outLoc) => {
+export async function convert(pack: string, type: string, name: string, ext: string, link: string | JSZip.JSZipObject, outLoc: string): Promise<boolean> {
     try {
         // Minecraft paths can only contain lowercase letters.
         // Also, paths are USUALLY case sensitive, except in Linux, but the temp folder in Linux is all lowercase anyway
@@ -137,17 +139,17 @@ exports.convert = async (pack, type, name, ext, link, outLoc) => {
         let known = true;
 
         if (ext === ".hjson" || ext === ".json") {
-            loc = path.parse(outLoc);
-            loc = path.join(loc.dir, loc.name) + ".json";
+            const floc = path.parse(outLoc);
+            loc = path.join(floc.dir, floc.name) + ".json";
         } else if (ext === ".yaml" || ext === ".yml") {
-            loc = path.parse(outLoc);
-            loc = path.join(loc.dir, loc.name) + ".json";
+            const floc = path.parse(outLoc);
+            loc = path.join(floc.dir, floc.name) + ".json";
         } else if (ext === ".cmds") {
-            loc = path.parse(outLoc);
-            loc = path.join(loc.dir, loc.name) + ".mcfunction";
+            const floc = path.parse(outLoc);
+            loc = path.join(floc.dir, floc.name) + ".mcfunction";
 
             // There's a separate function solely for converting CommandScript to MCFunction
-            await addCmds(path.resolve(loc), data);
+            await addCmds(path.resolve(loc), data as string);
             return true;
         } else if (ext !== ".mcfunction") {
             known = false;
@@ -168,14 +170,14 @@ exports.convert = async (pack, type, name, ext, link, outLoc) => {
 
             // Only if we know the file type do we attempt merging
             if (known) {
-                const oldData = await read(loc, path.extname(loc));
+                const oldData: {[key: string]: any} = await read(loc, path.extname(loc)) as {[key: string]: any};
                 // If the old file is the same as the new file, we just skip it because it doesn't matter
                 if (isEqual(oldData, data)) return true;
 
                 if (type === "tags") {
                     if (oldData.replace) data.replace = true;
                     // Mix the tag values together
-                    data.values = [...new Set([...oldData.values, ...data.values])];
+                    (data as {[key: string]: any}).values = [...new Set([...oldData.values, ...(data as {[key: string]: any}).values])];
 
                     safe = true;
                 }
@@ -185,24 +187,24 @@ exports.convert = async (pack, type, name, ext, link, outLoc) => {
             if (safe) {
                 await fs.writeFile(loc, data);
             } else {
-                if (packer.options.overwrite) {
-                    packer.addMSG(`"${type}" item "${name}" from pack "${pack}" is overwriting existing file`, "log");
+                if (options.overwrite) {
+                    addMSG(`"${type}" item "${name}" from pack "${pack}" is overwriting existing file`, "log");
                     await fs.rm(loc, {recursive: true});
                     await fs.writeFile(loc, data);
                 } else {
-                    packer.addMSG(`"${type}" item "${name}" from pack "${pack}" conflicts with existing file, ignoring`, "log");
+                    addMSG(`"${type}" item "${name}" from pack "${pack}" conflicts with existing file, ignoring`, "log");
                 }
             }
         } else {
             // If the file does not exist, we don't have to worry about overwriting
             if (known) data = JSON.stringify(data, null, 4);
             await fs.ensureFile(loc);
-            await fs.writeFile(loc, data);
+            await fs.writeFile(loc, data as string);
         }
 
         return true;
     } catch (err) {
-        packer.addMSG(`Failed to convert "${type}" item "${name}" from pack "${pack}", skipping; ${err}`, "error");
+        addMSG(`Failed to convert "${type}" item "${name}" from pack "${pack}", skipping; ${err}`, "error");
         return false;
     }
 };

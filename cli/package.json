@@ -1,11 +1,15 @@
 {
   "name": "zdpack",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "A tool for merging and converting Minecraft data and resource packs.",
-  "bin": {
-    "zdpack": "./src/cli.js"
+  "scripts": {
+    "build": "tsc && copy /Y src\\cmds.pegjs dist\\cmds.pegjs > NUL"
   },
-  "main": "./src/index.js",
+  "bin": {
+    "zdpack": "./dist/launch.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "author": "mathgeniuszach",
   "license": "ISC",
   "keywords": [
@@ -21,7 +25,7 @@
   },
   "dependencies": {
     "cli-progress": "^3.9.0",
-    "commander": "^7.2.0",
+    "commander": "^8.0.0",
     "fs-extra": "^10.0.0",
     "hjson": "^3.2.2",
     "js-yaml": "^4.1.0",
@@ -29,10 +33,14 @@
     "lodash": "^4.17.21",
     "nid": "^1.3.3",
     "pegjs": "^0.10.0",
-    "pegjs-util": "^1.4.21",
+    "react": "^16.14.0",
     "zip-dir": "^2.0.0"
   },
   "devDependencies": {
-    "eslint": "^7.27.0"
+    "@types/lodash": "^4.14.170",
+    "@types/node": "^15.12.5",
+    "eslint": "^7.29.0",
+    "ts-loader": "^9.2.3",
+    "typescript": "^4.3.4"
   }
 }

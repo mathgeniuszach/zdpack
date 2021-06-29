@@ -1,34 +1,31 @@
-const JSZip = require("jszip");
-const zipdir = require("zip-dir");
-const nid = require("nid");
-const zdpack = require(".");
+import JSZip from "jszip";
+import zipdir from "zip-dir";
+import nid from "nid";
+import zdpack from "./index";
 
-const fs = require("fs-extra");
-const {tmpdir} = require("os");
-const path = require("path");
+import fs from "fs-extra";
+import {tmpdir} from "os";
+import path from "path";
 
 // const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-let msgs = [];
-function addMSG(msg, type="log") {
+let msgs: [string, string][] = [];
+export function addMSG(msg: string, type: string = "log") {
     msgs.push([msg, type]);
 }
-function showMSGs() {
+export function showMSGs() {
     for (const [msg, type] of msgs) console[type](msg);
     msgs = [];
 }
-exports.addMSG = addMSG;
-exports.showMSGs = showMSGs;
 
-const {getPackFormat, validate, convert} = require("./convert");
-const {merge} = require("./merge");
+import {getPackFormat, validate, convert} from "./convert";
+import {merge} from "./merge";
 
-let options = {};
-exports.options = options;
-let payload = {};
-let bar = null;
+export const options: {[key: string]: any} = {};
+let payload: {[key: string]: any} = {};
+let bar: any = null;
 
-async function scanItem(packName, item, type) {
+async function scanItem(packName, item, type?: string) {
     let fileCount = 0;
 
     const stats = await fs.stat(item);
@@ -89,7 +86,7 @@ async function scanPack(root, packName) {
     return fileCount;
 }
 
-async function convertItem(packName, item, outItem, type) {
+async function convertItem(packName, item, outItem, type?: string) {
     const stats = await fs.stat(item);
     if (stats.isDirectory()) {
         // Convert every file in directories
@@ -161,9 +158,10 @@ async function convertPack(tempOut, pack) {
  * @param {*} ioptions Options describing what to pack and how to pack it
  * @param {*} ibar A progress bar to update as progress is made
  */
-async function pack(ioptions, ibar) {
-    options = ioptions;
-    exports.options = ioptions;
+export async function pack(ioptions, ibar) {
+    for (const key of Object.keys(options)) delete options[key];
+    Object.assign(options, ioptions);
+
     payload = {};
     bar = ibar;
 
@@ -322,4 +320,3 @@ async function pack(ioptions, ibar) {
         }
     }
 }
-exports.pack = pack;

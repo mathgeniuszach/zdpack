@@ -1,0 +1,14 @@
+{
+  "name": "zdpack-gui",
+  "version": "1.0.0",
+  "description": "GUI for zdpack",
+  "scripts": {
+    "start": "electron ."
+  },
+  "main": "index.js",
+  "author": "mathgeniuszach",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^13.1.4"
+  }
+}

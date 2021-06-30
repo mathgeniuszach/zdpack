@@ -5,30 +5,7 @@
 
         <title>zdpack gui</title>
 
-        <style>
-            #options {
-                display: grid;
-                grid-template-columns: 125px 1fr;
-                row-gap: 5px;
-            }
-            textarea {
-                resize: vertical;
-            }
-            label {
-                user-select: none;
-            }
-
-            #checkboxes {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-
-                margin: 5px 0px;
-            }
-            #checkboxes label {
-                margin-right: 10px;
-            }
-        </style>
+        <link rel="stylesheet" href="main.css">
     </head>
     <body>
         <div id="options">
@@ -36,39 +13,53 @@
             <select id="type" title="The format to output the final datapack in.">
                 <option value="data">data</option>
                 <option value="assets">assets</option>
-                <option value="pack">pack</option>
+                <option value="pack" selected>pack</option>
                 <option value="forge">forge</option>
                 <option value="fabric">fabric</option>
                 <option value="mod">mod</option>
             </select>
+            <div></div>
     
             <label for="output" title='"loc" is the full path and name of a folder location to output too, without an extension. Use NUL to mean "do not output to any folder", which is useful for validating json files. If the folder already exists, it will be deleted. Defaults to "pack".'>Output Location:</label>
-            <input id="output" title='"loc" is the full path and name of a folder location to output too, without an extension. Use NUL to mean "do not output to any folder", which is useful for validating json files. If the folder already exists, it will be deleted. Defaults to "pack".'>
+            <input id="output" title='"loc" is the full path and name of a folder location to output too, without an extension. Use NUL to mean "do not output to any folder", which is useful for validating json files. If the folder already exists, it will be deleted. Defaults to "pack".' value="pack">
+            <button>...</button>
+
+            <label for="js" title='An optional javascript file to be run before the pack is loaded. If a function named "init" is exported, it will be called automatically. If a function named "ready" is exported, it will be run after all other packs/items were merged and included. The working directory will be set to the root of the datapack before running the script or any function. Use the "zdpack" module for convenience functions you can use to make common files in a datapack.'>JS Build File:</label>
+            <input id="js" title='An optional javascript file to be run before the pack is loaded. If a function named "init" is exported, it will be called automatically. If a function named "ready" is exported, it will be run after all other packs/items were merged and included. The working directory will be set to the root of the datapack before running the script or any function. Use the "zdpack" module for convenience functions you can use to make common files in a datapack.'>
+            <button>...</button>
     
-            <label for="mcv" title="Minecraft version the output pack is designed for. Use a format like 1.16 or 1.16.0 or 1.16.4.">Minecraft Version:</label>
-            <input id="mcv" title="Minecraft version the output pack is designed for. Use a format like 1.16 or 1.16.0 or 1.16.4.">
+            <label for="mcv" title="Mcmeta version the output pack is designed for. If this number does not match the current required number, the data pack displays a warning and requires additional confirmation to load the pack. This table shows the version numbers: &#013;&#013;(1) 1.6.1-1.8.9 &#013;(2) 1.9-1.10.2 &#013;(3) 1.11-1.12.2 &#013;(4) 1.13-1.14.4 &#013;(5) 1.15-1.16.1 &#013;(6) 1.16.2-1.16.5 &#013;(7) 1.17 &#013;&#013;Other versions are not known yet.">Minecraft Version:</label>
+            <input type="number" id="mcv" title="Mcmeta version the output pack is designed for. If this number does not match the current required number, the data pack displays a warning and requires additional confirmation to load the pack. This table shows the version numbers: &#013;&#013;(1) 1.6.1-1.8.9 &#013;(2) 1.9-1.10.2 &#013;(3) 1.11-1.12.2 &#013;(4) 1.13-1.14.4 &#013;(5) 1.15-1.16.1 &#013;(6) 1.16.2-1.16.5 &#013;(7) 1.17 &#013;&#013;Other versions are not known yet." value="6">
+            <div></div>
     
             <label for="id" title="The mod id to use if the output is a mod. If this is not specified, the id is generated from the output folder.">Mod ID:</label>
             <input id="id" title="The mod id to use if the output is a mod. If this is not specified, the id is generated from the output folder.">
+            <div></div>
     
-            <label for="desc">Description:</label>
-            <textarea id="desc"></textarea>
-
-            <label for="js" title='A javascript file to be run before the pack is loaded. If a function named "init" is exported, it will be called automatically. If a function named "ready" is exported, it will be run after all other packs/items were merged and included. The working directory will be set to the root of the datapack before running the script or any function. Use the "zdpack" module for convenience functions you can use to make common files in a datapack.'>JS Build File:</label>
-            <input id="js" title='A javascript file to be run before the pack is loaded. If a function named "init" is exported, it will be called automatically. If a function named "ready" is exported, it will be run after all other packs/items were merged and included. The working directory will be set to the root of the datapack before running the script or any function. Use the "zdpack" module for convenience functions you can use to make common files in a datapack.'>
+            <label for="desc" title="A description for the outputed pack/mod, put into the pack.mcmeta file or the mod metadata.">Description:</label>
+            <textarea id="desc" title="A description for the outputed pack/mod, put into the pack.mcmeta file or the mod metadata."></textarea>
+            <div></div>
         </div>
-
         <div id="checkboxes">
-            <input type="checkbox" id="folder">
-            <label for="folder">Output as Folder</label>
+            <input type="checkbox" id="folder" title='Generate the output pack/mod as a folder at "output" instead of a zip or jar file.'>
+            <label for="folder" title='Generate the output pack/mod as a folder at "output" instead of a zip or jar file.'>Output as Folder</label>
     
-            <input type="checkbox" id="overwrite">
-            <label for="overwrite">Overwrite Mode</label>
+            <input type="checkbox" id="overwrite" title="By default, when merging packs together, data copied from packs last in the list will not overwrite data copied from a previous pack. This option makes it so data will overwrite previous files. This does not apply to tags, which can be merged with no issues.">
+            <label for="overwrite" title="By default, when merging packs together, data copied from packs last in the list will not overwrite data copied from a previous pack. This option makes it so data will overwrite previous files. This does not apply to tags, which can be merged with no issues.">Overwrite Mode</label>
         </div>
 
-        <hr>
-        <div class="list" id="packs"></div>
-        <hr>
-        <div class="list" id="include"></div>
+        <div class="list" id="packs">
+            <b>Packs</b>
+            <div></div>
+            <button>+folder(s)</button>
+            <button class="file">+file(s)</button>
+        </div>
+        <div class="list" id="include">
+            <b>Include Folders</b>
+            <div></div>
+            <button>+</button>
+        </div>
+
+        <div id="finalize"><button title="Packs all of the given packs to the output location given.">Pack!</button></div>
     </body>
 </html>

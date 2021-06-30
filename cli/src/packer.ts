@@ -18,7 +18,7 @@ export function showMSGs() {
     msgs = [];
 }
 
-import {getPackFormat, validate, convert} from "./convert";
+import {validate, convert} from "./convert";
 import {merge} from "./merge";
 
 export const options: {[key: string]: any} = {};
@@ -270,14 +270,14 @@ export async function pack(ioptions, ibar) {
     if (options.type !== "fabric") {
         // Create pack.mcmeta file
         fs.writeFile(path.join(tempOut, "pack.mcmeta"), JSON.stringify({pack: {
-            pack_format: getPackFormat(options.mcv),
+            pack_format: options.mcv,
             description: options.desc || ""
         }}, null, 4));
     }
     if (options.type === "forge" || options.type === "mod") {
         await fs.ensureDir(path.join(tempOut, "META-INF"));
         await fs.writeFile(path.join(tempOut, "META-INF/MANIFEST.MF"), "Manifest-Version: 1.0\nFMLModType: LIBRARY\n\n");
-        await fs.writeFile(path.join(tempOut, "META-INF/mods.toml"), `modLoader="javafml"\nloaderVersion="[1,)"\nlicense="It exists somewhere, I think"\n\n[[mods]]\nmodId="${options.id || path.basename(options.output).replace(/[^A-Za-z_]+/g, "").toLowerCase()}"\ndisplayName="${path.basename(options.output)}"\nversion="1.0.0"\ndescription='''\n${options.desc || ""}\n'''`);
+        await fs.writeFile(path.join(tempOut, "META-INF/mods.toml"), `modLoader="javafml"\nloaderVersion="[1,)"\nlicense="It exists somewhere, I think"\n\n[[mods]]\nmodId="${options.id || path.basename(options.output || "pack").replace(/[^A-Za-z_]+/g, "").toLowerCase()}"\ndisplayName="${path.basename(options.output)}"\nversion="1.0.0"\ndescription='''\n${options.desc || ""}\n'''`);
     }
     if (options.type === "fabric" || options.type === "mod") {
         await fs.writeFile(path.join(tempOut, "fabric.mod.json"), JSON.stringify({

@@ -17,19 +17,14 @@ program
         '- "loc" is the full path and name of a folder location to output too, without an extension. Use NUL to mean "do not output to any folder", which is useful for validating json files. If the folder already exists, it will be deleted. Defaults to "pack".',
         "pack"
     ).requiredOption(
-        "-m, --mcv <ver>",
-        "- Minecraft version the output pack is designed for. Use a format like 1.16 or 1.16.0 or 1.16.4.",
-        (v) => {
-            if (!/^\d+\.\d+(?:\.\d+)?$/.test(v))
-                throw new InvalidOptionArgumentError(`Invalid Minecraft version "${v}"`);
-            return v;
-        }
+        "-v, --mcv <ver>",
+        "- Mcmeta version the output pack is designed for. If this number does not match the current required number, the data pack displays a warning and requires additional confirmation to load the pack. 1 is for 1.6.1-1.8.9, 2 for 1.9-1.10.2, 3 for 1.11-1.12.2, 4 for 1.13-1.14.4, 5 for 1.15-1.16.1, 6 for 1.16.2-1.16.5, and 7 for 1.17.",
     ).option(
         "-p, --packs <packs...>",
         "- A list of packs (or just a single pack) to convert/merge together. If none are given, the output folder might be empty."
     ).option(
         "-d, --desc <desc>",
-        "- A description for the outputed pack/mod."
+        "- A description for the outputed pack/mod, put into the pack.mcmeta file or the mod metadata."
     ).option(
         "-f, --folder",
         '- Generate the output pack/mod as a folder at "output" instead of a zip or jar file.'
@@ -44,7 +39,7 @@ program
         "- A list of folders/zips to merge on top of the final output. Items in these folders/zips will always overwrite items with the same name from left to right. You can use this to include files or overwrite mod metadata to include dependencies."
     ).option(
         "-j, --js <file>",
-        '- A javascript file to be run before the pack is loaded. If a function named "init" is exported, it will be called automatically. If a function named "ready" is exported, it will be run after all other packs/items were merged and included. The working directory will be set to the root of the datapack before running the script or any function. Use the "zdpack" module for convenience functions you can use to make common files in a datapack.'
+        '- An optional javascript file to be run before the pack is loaded. If a function named "init" is exported, it will be called automatically. If a function named "ready" is exported, it will be run after all other packs/items were merged and included. The working directory will be set to the root of the datapack before running the script or any function. Use the "zdpack" module for convenience functions you can use to make common files in a datapack.'
     );
 
 program.parse();

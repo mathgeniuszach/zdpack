@@ -9,6 +9,10 @@
   "author": "mathgeniuszach",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^13.1.4"
+    "electron": "^13.1.4",
+    "eslint": "^7.29.0"
+  },
+  "dependencies": {
+    "@electron/remote": "^1.2.0"
   }
 }

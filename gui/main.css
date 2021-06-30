@@ -1,0 +1,58 @@
+* {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+body {
+    margin: 10px;
+}
+#options {
+    display: grid;
+    grid-template-columns: 125px 1fr 27px;
+    gap: 5px;
+}
+textarea {
+    min-height: 30px;
+    resize: vertical;
+}
+label {
+    user-select: none;
+    justify-self: right;
+    align-self: center;
+
+    font-size: 0.9em;
+}
+.list {
+    margin: 10px 0px;
+    padding: 3px;
+
+    border: 3px solid #bbb;
+    background-color: #eee;
+}
+.list > div {
+    margin-top: 7px;
+}
+.list > div > div {
+    width: 100%;
+    display: flex;
+    gap: 5px;
+    margin-bottom: 7px;
+}
+.list input {
+    flex-grow: 1;
+}
+
+#checkboxes {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    margin: 5px 0px;
+}
+#checkboxes label {
+    margin-right: 10px;
+}
+#finalize {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

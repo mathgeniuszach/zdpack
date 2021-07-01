@@ -6,7 +6,7 @@ body {
 }
 #options {
     display: grid;
-    grid-template-columns: 125px 1fr 27px;
+    grid-template-columns: 125px 1fr;
     gap: 5px;
 }
 textarea {

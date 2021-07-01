@@ -9,8 +9,6 @@ const options = {
     type: "pack",
     output: "pack",
     mcv: 6,
-    packs: [],
-    include: []
 };
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -23,10 +21,23 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     // Implement functionality of pack button
-    document.querySelector("#finalize > button").onclick = () => {
-        if (!options.output) options.output = "pack";
-        console.log(options); // TODO: remove this when done
-        pack(options, new GUIBar());
+    const finalizer = document.querySelector("#finalize > button");
+    finalizer.onclick = async () => {
+        try {
+            finalizer.setAttribute("disabled", "");
+
+            if (!options.output) options.output = "pack";
+            console.log(options); // TODO: remove this when done
+            await pack(JSON.parse(JSON.stringify(options)), new GUIBar()); // Copies options to stop any race conditions
+
+            await dialog.showMessageBox(undefined, {
+                message: "Packing complete!"
+            });
+        } catch (err) {
+            await dialog.showErrorBox("Fatal Error while packing.", `${err.stack}`);
+        } finally {
+            finalizer.removeAttribute("disabled");
+        }
     };
 
     // Add functionality to each list
@@ -38,6 +49,7 @@ window.addEventListener("DOMContentLoaded", () => {
             console.log(dialog);
             const paths = dialog.showOpenDialogSync(undefined, {properties: [addBtn.classList.contains("file") ? "openFile" : "openDirectory", "multiSelections"]});
             if (!paths) return;
+            if (!options[list.id]) options[list.id] = [];
             options[list.id].push(...paths);
     
             for (const path of paths) {
@@ -57,7 +69,10 @@ window.addEventListener("DOMContentLoaded", () => {
                     const item = this.parentElement;
                     const index = Array.prototype.indexOf.call(item.parentElement, item);
                     console.log(item.parentElement.id);
-                    options[item.parentElement.parentElement.id].splice(index, 1);
+
+                    const array = options[item.parentElement.parentElement.id];
+                    array.splice(index, 1);
+                    if (array.length == 0) delete options[item.parentElement.parentElement.id];
                     item.remove();
                 };
 

@@ -17,7 +17,7 @@ class GUIBar {
         this.update(payload);
     }
     update(payload) {
-        this.info.textContent = `${this.value}/${this.max} | ${Math.round(100 * this.value / this.max)} | ${payload.item}`;
+        this.info.textContent = `${this.value}/${this.max} | ${Math.round(100 * this.value / this.max)} | ${payload?.item ?? "..."}`;
     }
     increment() {
         this.progress.value = ++this.value;
@@ -58,7 +58,7 @@ window.addEventListener("DOMContentLoaded", () => {
             await dialog.showMessageBox(undefined, {
                 title: " ",
                 type: "info",
-                message: "Packing complete! Check the output location for the file."
+                message: "Packing complete! Check the output location for the file (or your Downloads folder!)."
             });
         } catch (err) {
             await dialog.showErrorBox("Fatal Error while packing.", `${err.stack}`);

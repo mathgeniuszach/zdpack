@@ -1,5 +1,8 @@
 const {app, BrowserWindow} = require('electron');
 const path = require("path");
+const {getDownloadsFolder} = require("platform-folders");
+
+process.chdir(getDownloadsFolder());
 
 // if (process.argv.length <= 1) {
 // Initialize the remote module (because it's easier AND WAY SIMPLER than ipc)

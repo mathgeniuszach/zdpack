@@ -5,7 +5,7 @@
     "scripts": {
         "copyzdp": "copyfiles --up 3 \"../cli/dist/*.*\" \"src/packer\"",
         "start": "npm run copyzdp && electron .",
-        "build": "npm run copyzdp && electron-builder build --win portable"
+        "build": "npm run copyzdp && electron-builder build"
     },
     "build": {
         "appId": "zdpack-gui",

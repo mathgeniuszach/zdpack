@@ -2,15 +2,16 @@
 
 zdpack stands for "Zach's Datapacker" and is a tool for merging and converting Minecraft data and resource packs.
 
-As of right now there is only a cli. It is capable of outputing to packs or mods, and will automatically convert yaml and hjson files to json files in the output. It also supports running a javascript file to create part or all of the datapack as well. Use the `zdpack` module in node for some convenience functions when generating your datapack (more coming soon).
+As of right now there is only a CLI. It is capable of outputing to packs or mods, and will automatically convert yaml and hjson files to json files in the output. It also supports running a javascript file to create part or all of the datapack as well. Use the `zdpack` module in node for some convenience functions when generating your datapack (more coming soon).
 
 This tool is WIP, so expect some bugs.
 
 ## Installation
 
-zdpack requires [Node](https://nodejs.org/en/) in order to run. Once you have it installed, install zdpack with npm in a terminal: `npm install -g zdpack`
-
-After installing you should be able to use the `zdpack` command in the terminal (may require you to close and reopen the terminal).
+#### GUI (Graphical Interface; recommended for simple packing)
+If you use windows, you can use the executable found on the releases page. Otherwise you'll have to build it from the repo yourself (not recommended for normal users). If someone else wants to edit the `npm run build` command to build portable linux and mac variants of the program and pull request it, it would be appreciated.
+#### CLI (Command Line; recommended for datapack creators)
+The command line variant of zdpack requires [Node](https://nodejs.org/en/) in order to run. Install the CLI from npm with `npm install -g zdpack` (afterwards you can use the zdpack command in any terminal).
 
 ## Examples
 

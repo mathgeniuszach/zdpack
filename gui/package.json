@@ -8,7 +8,11 @@
         "build": "npm run copyzdp && electron-builder build --win portable"
     },
     "build": {
-        "appId": "zdpack-gui"
+        "appId": "zdpack-gui",
+        "win": {
+            "target": "portable",
+            "icon": "build/icon.ico"
+        }
     },
     "main": "src/index.js",
     "author": "mathgeniuszach",

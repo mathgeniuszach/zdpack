@@ -1,8 +1,29 @@
 const {dialog} = require("@electron/remote");
-const {pack} = require("../cli/dist/index");
+const {pack} = require("./packer/index");
 
 class GUIBar {
+    constructor() {
+        this.progress = document.querySelector("progress");
+        this.info = document.querySelector("#progress > span");
+    }
 
+    start(max, value=0, payload=null) {
+        this.max = max;
+        this.value = value;
+
+        this.progress.max = max;
+        this.progress.value = value;
+
+        this.update(payload);
+    }
+    update(payload) {
+        this.info.textContent = `${this.value}/${this.max} | ${Math.round(100 * this.value / this.max)} | ${payload.item}`;
+    }
+    increment() {
+        this.progress.value = ++this.value;
+        this.info.textContent = "...";
+    }
+    stop() {}
 }
 
 const options = {
@@ -20,6 +41,10 @@ window.addEventListener("DOMContentLoaded", () => {
         };
     }
 
+    document.querySelector("select").onclick = function () {
+        options.type = this.value;
+    };
+
     // Implement functionality of pack button
     const finalizer = document.querySelector("#finalize > button");
     finalizer.onclick = async () => {
@@ -31,7 +56,9 @@ window.addEventListener("DOMContentLoaded", () => {
             await pack(JSON.parse(JSON.stringify(options)), new GUIBar()); // Copies options to stop any race conditions
 
             await dialog.showMessageBox(undefined, {
-                message: "Packing complete!"
+                title: " ",
+                type: "info",
+                message: "Packing complete! Check the output location for the file."
             });
         } catch (err) {
             await dialog.showErrorBox("Fatal Error while packing.", `${err.stack}`);

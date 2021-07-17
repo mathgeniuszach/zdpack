@@ -1,5 +1,6 @@
 * {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    box-sizing: border-box;
 }
 body {
     margin: 10px;
@@ -39,6 +40,9 @@ label {
 .list input {
     flex-grow: 1;
 }
+.list b {
+    user-select: none;
+}
 
 #checkboxes {
     display: flex;
@@ -55,4 +59,16 @@ label {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+#progress {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+
+    padding: 10px 50px;
+    margin-bottom: 10px;
+}
+#progress > * {
+    text-align: center;
+    width: 100%;
 }

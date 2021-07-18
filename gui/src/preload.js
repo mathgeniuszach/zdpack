@@ -46,10 +46,20 @@ window.addEventListener("DOMContentLoaded", () => {
         options.type = this.value;
     };
 
-    // Implement functionality of locator buttons
-    for (const btn of document.querySelectorAll(".locator")) {
+    // Implement functionality of locator/saver buttons
+    for (const btn of document.querySelectorAll(".saver")) {
         btn.onclick = async () => {
             let v = (await dialog.showSaveDialog(app.win, {title: " "})).filePaths[0];
+            if (!v) return;
+            if (btn.hasAttribute("noext") && v.includes(".")) v = v.substring(0, v.lastIndexOf("."));
+
+            const input = document.getElementById(btn.getAttribute("for"));
+            input.value = v;
+        };
+    }
+    for (const btn of document.querySelectorAll(".locator")) {
+        btn.onclick = async () => {
+            let v = (await dialog.showOpenDialog(app.win, {title: " ", extensions: [btn.getAttribute("ext")]})).filePaths[0];
             if (!v) return;
             if (btn.hasAttribute("noext") && v.includes(".")) v = v.substring(0, v.lastIndexOf("."));
 

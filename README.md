@@ -8,12 +8,12 @@ This tool is WIP, so expect some bugs.
 
 ## Installation
 
-#### GUI (Graphical Interface; recommended for simple packing)
+#### GUI (Graphical User Interface)
 If you use windows, you can use the executable found on the releases page. Otherwise you'll have to build it from the repo yourself (not recommended for normal users). If someone else wants to edit the `npm run build` command to build portable linux and mac variants of the program and pull request it, it would be appreciated.
-#### CLI (Command Line; recommended for datapack creators)
+#### CLI (Command Line Interface)
 The command line variant of zdpack requires [Node](https://nodejs.org/en/) in order to run. Install the CLI from npm with `npm install -g zdpack` (afterwards you can use the zdpack command in any terminal).
 
-## Examples
+## CLI Examples
 
 To see all command line options, use `zdpack -h`.
 
@@ -25,9 +25,13 @@ This command will convert the datapack `a.zip` into a mod `a.jar` in the current
 
 `zdpack -m 1.16.5 -t mod -p a.zip -o a`
 
-This command will generate a bare bones datapack and run a javascript file to do the rest of the work:
+This command will generate a bare bones datapack and run a javascript file to do the rest of the work; keep in mind that it will need a node_modules folder with zdpack inside if you want it to use zdpack functions:
 
 `zdpack -m 1.16.5 -j build.js`
+
+## Video Explanation
+
+Coming Soon!
 
 ## CommandScript
 

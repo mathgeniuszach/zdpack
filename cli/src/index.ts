@@ -133,7 +133,7 @@ export function resolveID(type: string, id: string, ext: string = ".json", root:
 export async function add(type: string, id: string, object: any, root: string = "data") {
     const tid = resolveID(type, id, ".json", root);
     await fs.ensureFile(tid);
-    await fs.writeJSON(tid, object);
+    await fs.writeJSON(tid, object, {spaces: 4});
 }
 
 /**
@@ -160,14 +160,14 @@ export async function addTag(type: string, id: string, values: string[], replace
     const tid = resolveID("tags/"+type, id);
     if (replace) {
         await fs.ensureFile(tid);
-        await fs.writeJSON(tid, {replace: true, values});
+        await fs.writeJSON(tid, {replace: true, values}, {spaces: 4});
     } else {
         if (fs.existsSync(tid)) {
             const old: {values: string[]} = await fs.readJSON(tid);
-            await fs.writeJSON(tid, {values: [...new Set<string>([...old.values, ...values])]});
+            await fs.writeJSON(tid, {values: [...new Set<string>([...old.values, ...values])]}, {spaces: 4});
         } else {
             await fs.ensureFile(tid);
-            await fs.writeJSON(tid, {values});
+            await fs.writeJSON(tid, {values}, {spaces: 4});
         }
     }
 }
@@ -190,8 +190,8 @@ export async function addShapedRecipe(id: string, pattern: (string | string[])[]
     let x = 0;
     const rkey = {"": " "};
 
-    for (let r = 0; r < iptrn.length; r++) {
-        iptrn[r] = "";
+    for (let r = 0; r < pattern.length; r++) {
+        iptrn.push("");
         for (let c = 0; c < len; c++) {
             let v = pattern[r][c] || "";
             if (typeof v == "object") v = JSON.stringify(v);
@@ -209,6 +209,7 @@ export async function addShapedRecipe(id: string, pattern: (string | string[])[]
     // Create the actual recipe key
     const key = {};
     for (const [k, v] of Object.entries(rkey)) {
+        if (!k) continue;
         switch (k[0]) {
             case "#":
                 key[v] = {tag: k.substring(1)};

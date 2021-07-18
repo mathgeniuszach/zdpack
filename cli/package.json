@@ -1,6 +1,6 @@
 {
     "name": "zdpack",
-    "version": "0.3.5",
+    "version": "0.3.6",
     "description": "A tool for merging and converting Minecraft data and resource packs.",
     "scripts": {
         "build": "tsc && copy /Y src\\cmds.pegjs dist\\cmds.pegjs > NUL"

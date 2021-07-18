@@ -199,7 +199,7 @@ export async function addShapedRecipe(id: string, pattern: (string | string[])[]
             if (v in rkey) {
                 iptrn[r] += rkey[v];
             } else {
-                rkey[String(x)] = v;
+                rkey[v] = String(x);
                 iptrn[r] += x;
                 x++;
             }
@@ -445,7 +445,7 @@ export async function addCmds(id: string, data: string | {[key: string]: any}[],
     if (append) {
         await fs.writeFile(loc, code + "\n");
     } else {
-        await fs.appendFile(loc, "\n" + code + "\n");
+        await fs.appendFile(loc, code + "\n");
     }
 }
 

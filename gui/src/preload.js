@@ -53,8 +53,10 @@ window.addEventListener("DOMContentLoaded", () => {
             if (!v) return;
             if (btn.hasAttribute("noext") && v.includes(".")) v = v.substring(0, v.lastIndexOf("."));
 
-            const input = document.getElementById(btn.getAttribute("for"));
+            const id = btn.getAttribute("for");
+            const input = document.getElementById(id);
             input.value = v;
+            options[id] = v;
         };
     }
     for (const btn of document.querySelectorAll(".locator")) {
@@ -63,8 +65,10 @@ window.addEventListener("DOMContentLoaded", () => {
             if (!v) return;
             if (btn.hasAttribute("noext") && v.includes(".")) v = v.substring(0, v.lastIndexOf("."));
 
-            const input = document.getElementById(btn.getAttribute("for"));
+            const id = btn.getAttribute("for");
+            const input = document.getElementById(id);
             input.value = v;
+            options[id] = v;
         };
     }
 
@@ -75,7 +79,6 @@ window.addEventListener("DOMContentLoaded", () => {
             finalizer.setAttribute("disabled", "");
 
             if (!options.output) options.output = "pack";
-            console.log(options); // TODO: remove this when done
             await pack(JSON.parse(JSON.stringify(options)), new GUIBar()); // Copies options to stop any race conditions
 
             await dialog.showMessageBox(app.win, {

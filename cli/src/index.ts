@@ -21,7 +21,7 @@ export const state = {
     rng: "f" + nid(10),
 
     // Registered custom commands
-    cmds: new Set(["ability","advancement","agent","allowlist","alwaysday","attribute","ban","ban-ip","banlist","bossbar","camerashake","changesetting","classroommode","clear","clearspawnpoint","clone","closechat","closewebsocket","code","codebuilder","connect","data","datapack","daylock","debug","dedicatedwsserver","defaultgamemode","deop","dialogue","difficulty","effect","enableencryption","enchant","event","execute","experience","fill","fog","forceload","function","gamemode","gamerule","gametest","getchunkdata","getchunks","geteduclientinfo","geteduserverinfo","getlocalplayername","getspawnpoint","gettopsolidblock","give","globalpause","help","immutableworld","item","kick","kill","lesson","list","listd","locate","locatebiome","loot","me","mobevent","msg","music","op","ops","pardon","pardon-ip","particle","permission","playanimation","playsound","publish","querytarget","recipe","reload","remove","replaceitem","ride","save","save-all","save-off","save-on","say","schedule","scoreboard","seed","setblock","setidletimeout","setmaxplayers","setworldspawn","spawnitem","spawnpoint","spectate","spreadplayers","stop","stopsound","structure","summon","tag","takepicture","team","teammsg","teleport","tell","tellraw","testfor","testforblock","testforblocks","tickingarea","time","title","titleraw","tm","toggledownfall","tp","trigger","videostream","w","wb","weather","whitelist","worldborder","worldbuilder","wsserver","xp","achievement","banip","blockdata","broadcast","chunk","clearfixedinv","detect","entitydata","executeasself","home","position","mixer","resupply","say","setfixedinvslot","setfixedinvslots","setspawn","solid","stats","toggledownfall","transferserver","unban"]),
+    cmds: new Set(["ability","advancement","agent","allowlist","alwaysday","attribute","ban","ban-ip","banlist","bossbar","camerashake","changesetting","classroommode","clear","clearspawnpoint","clone","closechat","closewebsocket","code","codebuilder","connect","data","datapack","daylock","debug","dedicatedwsserver","defaultgamemode","deop","dialogue","difficulty","effect","enableencryption","enchant","event","execute","experience","fill","fog","forceload","function","gamemode","gamerule","gametest","getchunkdata","getchunks","geteduclientinfo","geteduserverinfo","getlocalplayername","getspawnpoint","gettopsolidblock","give","globalpause","help","immutableworld","item","kick","kill","lesson","list","listd","locate","locatebiome","loot","me","mobevent","msg","music","op","ops","pardon","pardon-ip","particle","permission","playanimation","playsound","publish","querytarget","recipes","reload","remove","replaceitem","ride","save","save-all","save-off","save-on","say","schedule","scoreboard","seed","setblock","setidletimeout","setmaxplayers","setworldspawn","spawnitem","spawnpoint","spectate","spreadplayers","stop","stopsound","structure","summon","tag","takepicture","team","teammsg","teleport","tell","tellraw","testfor","testforblock","testforblocks","tickingarea","time","title","titleraw","tm","toggledownfall","tp","trigger","videostream","w","wb","weather","whitelist","worldborder","worldbuilder","wsserver","xp","achievement","banip","blockdata","broadcast","chunk","clearfixedinv","detect","entitydata","executeasself","home","position","mixer","resupply","say","setfixedinvslot","setfixedinvslots","setspawn","solid","stats","toggledownfall","transferserver","unban"]),
     callbacks: {},
 };
 
@@ -183,7 +183,7 @@ export async function addTag(type: string, id: string, values: string[], replace
 export async function addShapedRecipe(id: string, pattern: (string | string[])[][], result: string, count: number = 1, group?: string) {
     // Get the size of the pattern
     const iptrn: string[] = [];
-    const len = Math.max(...iptrn.map(v=>v.length));
+    const len = Math.max(...pattern.map(v=>v.length));
     if (pattern.length > 3 || pattern.length < 1 || len > 3 || len < 1) throw Error(`Invalid dimensions ${len}x${pattern.length} for recipe pattern.`);
 
     // Create a reversed key
@@ -232,7 +232,7 @@ export async function addShapedRecipe(id: string, pattern: (string | string[])[]
         }
     };
     if (group) data["group"] = group;
-    await add("recipe", id, data);
+    await add("recipes", id, data);
 }
 
 /**
@@ -260,7 +260,7 @@ export async function addShapelessRecipe(id: string, ingredients: (string | stri
         }
     };
     if (group) data["group"] = group;
-    await add("recipe", id, data);
+    await add("recipes", id, data);
 }
 
 /**
@@ -270,7 +270,7 @@ export async function addShapelessRecipe(id: string, ingredients: (string | stri
  * @param type the `*` part of `crafting_special_*`. See the {@link https://minecraft.fandom.com/wiki/Recipe#crafting_special_.2A wiki} for more information.
  */
 export async function addSpecialRecipe(id: string, type: string) {
-    await add("recipe", id, {type: "crafting_special_" + type});
+    await add("recipes", id, {type: "crafting_special_" + type});
 }
 
 export async function addCookingRecipe(id: string, ingredient: string | string[], result: string, {type, cookingtime = 200, experience, group}: {type: string | string[], cookingtime: number, experience?: number, group?: string}) {
@@ -289,7 +289,7 @@ export async function addCookingRecipe(id: string, ingredient: string | string[]
     };
     if (group) data["group"] = group;
     if (experience) data["experience"] = experience;
-    await add("recipe", id, data);
+    await add("recipes", id, data);
 }
 
 export async function addSmithingRecipe(id: string, base: string, addition: string, result: string, group?: string) {
@@ -300,7 +300,7 @@ export async function addSmithingRecipe(id: string, base: string, addition: stri
         result: result
     };
     if (group) data["group"] = group;
-    await add("recipe", id, data);
+    await add("recipes", id, data);
 }
 
 export async function addStonecuttingRecipe(id: string, ingredient: string | string[], result: string, count: number = 1, group?: string) {
@@ -318,7 +318,7 @@ export async function addStonecuttingRecipe(id: string, ingredient: string | str
         count: count
     };
     if (group) data["group"] = group;
-    await add("recipe", id, data);
+    await add("recipes", id, data);
 }
 
 /**

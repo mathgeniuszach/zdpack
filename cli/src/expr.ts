@@ -1,4 +1,4 @@
-import {state, Selector, compileCmd} from "./index";
+import {state, Selector, compileCmd, stringify} from "./index";
 const modInt = (a) => (a + 2147483648) % 4294967296 - 2147483648;
 
 /**
@@ -36,14 +36,14 @@ export async function parseExpr(ast: {[key: string]: any}, reset: boolean = true
             // This is a data check
             if (ast.length == 5 && ast[3] == "has") {
                 // This is a block data check
-                code.push(`execute store result score ${state.n} __temp__ if data block ${ast.slice(0, 3).join(" ")} ${ast[4]}`);
+                code.push(`execute store result score ${state.n} __temp__ if data block ${ast.slice(0, 3).join(" ")} ${stringify(ast[4])}`);
             } else if (ast.length == 3 && ast[1] == "has") {
                 if (ast[0] instanceof Selector) {
                     // This is an entity data check
-                    code.push(`execute store result score ${state.n} __temp__ if data entity ${ast[0]} ${ast[2]}`);
+                    code.push(`execute store result score ${state.n} __temp__ if data entity ${ast[0]} ${stringify(ast[2])}`);
                 } else {
                     // This is a storage data check
-                    code.push(`execute store result score ${state.n} __temp__ if data storage ${ast[0]} ${ast[2]}`);
+                    code.push(`execute store result score ${state.n} __temp__ if data storage ${ast[0]} ${stringify(ast[2])}`);
                 }
             } else {
                 throw Error(`unknown special expression ${JSON.stringify(ast)}`);

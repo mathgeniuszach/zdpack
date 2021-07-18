@@ -1,4 +1,4 @@
-const {dialog} = require("@electron/remote");
+const {dialog, app} = require("@electron/remote");
 const {pack} = require("./packer/index");
 
 class GUIBar {
@@ -41,9 +41,22 @@ window.addEventListener("DOMContentLoaded", () => {
         };
     }
 
+    // Bind select menu
     document.querySelector("select").onclick = function () {
         options.type = this.value;
     };
+
+    // Implement functionality of locator buttons
+    for (const btn of document.querySelectorAll(".locator")) {
+        btn.onclick = async () => {
+            let v = (await dialog.showSaveDialog(app.win, {title: " "})).filePaths[0];
+            if (!v) return;
+            if (btn.hasAttribute("noext") && v.includes(".")) v = v.substring(0, v.lastIndexOf("."));
+
+            const input = document.getElementById(btn.getAttribute("for"));
+            input.value = v;
+        };
+    }
 
     // Implement functionality of pack button
     const finalizer = document.querySelector("#finalize > button");
@@ -55,7 +68,7 @@ window.addEventListener("DOMContentLoaded", () => {
             console.log(options); // TODO: remove this when done
             await pack(JSON.parse(JSON.stringify(options)), new GUIBar()); // Copies options to stop any race conditions
 
-            await dialog.showMessageBox(undefined, {
+            await dialog.showMessageBox(app.win, {
                 title: " ",
                 type: "info",
                 message: "Packing complete! Check the output location for the file (or your Downloads folder!)."
@@ -74,7 +87,7 @@ window.addEventListener("DOMContentLoaded", () => {
             const list = this.parentElement;
 
             console.log(dialog);
-            const paths = dialog.showOpenDialogSync(undefined, {properties: [addBtn.classList.contains("file") ? "openFile" : "openDirectory", "multiSelections"]});
+            const paths = dialog.showOpenDialogSync(app.win, {properties: [addBtn.classList.contains("file") ? "openFile" : "openDirectory", "multiSelections"]});
             if (!paths) return;
             if (!options[list.id]) options[list.id] = [];
             options[list.id].push(...paths);

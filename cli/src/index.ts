@@ -137,6 +137,18 @@ export async function add(type: string, id: string, object: any, root: string = 
 }
 
 /**
+ * Deletes the specific file or folder in the datapack at the given id.
+ * 
+ * @param type The folder underneath the namespace folder, like "tags" or "advancements".
+ * @param id A namespaced id to be put into the `resolveID()` function. If it does not have an extension the extension is assumed to be ".json"
+ * @param root The root folder under the pack folder, "data" for datapacks and "assets" for resource packs. Defaults to "data".
+ */
+export async function remove(type: string, id: string, root: string = "data") {
+    const tid = resolveID(type, id, ".json", root);
+    await fs.remove(tid);
+}
+
+/**
  * Creates or merges values in a tag (specified by a namespaced id).
  * 
  * @param {string} type The folder underneath the "tags" folder, like "items", "blocks", or "functions".
@@ -158,6 +170,155 @@ export async function addTag(type: string, id: string, values: string[], replace
             await fs.writeJSON(tid, {values});
         }
     }
+}
+
+/**
+ * Creates a shaped recipe in the datapack at the given id, that takes in the items in `pattern` and outputs the resulting item. Note that NBT crafting is NOT supported by vanilla minecraft. If you need more precise control of the recipe, use the `add()` function.
+ * 
+ * @param id A namespaced id to be put into the `resolveID()` function that specifies where to put the recipe.
+ * @param pattern A list of lists of strings that make up the recipe. For example, `[["minecraft:stone", "minecraft:stone"]]` refers to two pieces of stone horizontally put together. If you want nothing in a spot, use "" or another falsy value. You can also preface a string with a `#` mark to use a tag instead of an item. If an array of strings is used instead of a string, any of those items or tags will be valid for that spot in the crafting recipe.
+ * @param result A string id of the item made as a result of the crafting recipe.
+ * @param count The number of crafted items made from this recipe.
+ */
+export async function addShapedRecipe(id: string, pattern: (string | string[])[][], result: string, count: number = 1, group?: string) {
+    // Get the size of the pattern
+    const iptrn: string[] = [];
+    const len = Math.max(...iptrn.map(v=>v.length));
+    if (pattern.length > 3 || pattern.length < 1 || len > 3 || len < 1) throw Error(`Invalid dimensions ${len}x${pattern.length} for recipe pattern.`);
+
+    // Create a reversed key
+    let x = 0;
+    const rkey = {"": " "};
+
+    for (let r = 0; r < iptrn.length; r++) {
+        iptrn[r] = "";
+        for (let c = 0; c < len; c++) {
+            let v = pattern[r][c] || "";
+            if (typeof v == "object") v = JSON.stringify(v);
+
+            if (v in rkey) {
+                iptrn[r] += rkey[v];
+            } else {
+                rkey[String(x)] = v;
+                iptrn[r] += x;
+                x++;
+            }
+        }
+    }
+
+    // Create the actual recipe key
+    const key = {};
+    for (const [k, v] of Object.entries(rkey)) {
+        switch (k[0]) {
+            case "#":
+                key[v] = {tag: k.substring(1)};
+                break;
+            case "[":
+                key[v] = JSON.parse(v).map((s: string) => s[0] == "#" ? {tag: s.substring(1)} : {item: s});
+                break;
+            default:
+                key[v] = {item: k};
+                break;
+        }
+    }
+
+    // Write recipe to file
+    const data = {
+        pattern: iptrn,
+        key: key,
+        result: {
+            item: result,
+            count: count
+        }
+    };
+    if (group) data["group"] = group;
+    await add("recipe", id, data);
+}
+
+/**
+ * Creates a shapeless recipe in the datapack at the given id, that takes in the items in `ingredients` and outputs the resulting item. Note that NBT crafting is NOT supported by vanilla minecraft. If you need more precise control of the recipe, use the `add()` function.
+ * 
+ * @param id A namespaced id to be put into the `resolveID()` function that specifies where to put the recipe.
+ * @param ingredients A list of strings that make up the items required in this recipe. For example, `["minecraft:stone", "minecraft:stone"]` refers to two pieces of stone put together. You can also preface a string with a `#` mark to use a tag instead of an item. If an array of strings is used instead of a string, any of those items or tags will be valid for that spot in the crafting recipe.
+ * @param result A string id of the item made as a result of the crafting recipe.
+ * @param count The number of crafted items made from this recipe.
+ * @param group A string identifier. Used to group multiple recipes together in the recipe book.
+ */
+export async function addShapelessRecipe(id: string, ingredients: (string | string[])[], result: string, count: number = 1, group?: string) {
+    const data = {
+        type: "crafting_shapeless",
+        ingredients: ingredients.map((v) => {
+            if (typeof v == "object") {
+                return v.map((s: string) => s[0] == "#" ? {tag: s.substring(1)} : {item: s});
+            } else {
+                return v[0] == "#" ? {tag: v.substring(1)} : {item: v};
+            }
+        }),
+        result: {
+            item: result,
+            count: count
+        }
+    };
+    if (group) data["group"] = group;
+    await add("recipe", id, data);
+}
+
+/**
+ * When the "vanilla" data pack is disabled, these kinds of recipes can be used to reenable desired builtin crafting recipes.
+ * 
+ * @param id A namespaced id to be put into the `resolveID()` function that specifies where to put the recipe.
+ * @param type the `*` part of `crafting_special_*`. See the {@link https://minecraft.fandom.com/wiki/Recipe#crafting_special_.2A wiki} for more information.
+ */
+export async function addSpecialRecipe(id: string, type: string) {
+    await add("recipe", id, {type: "crafting_special_" + type});
+}
+
+export async function addCookingRecipe(id: string, ingredient: string | string[], result: string, {type, cookingtime = 200, experience, group}: {type: string | string[], cookingtime: number, experience?: number, group?: string}) {
+    let s;
+    if (typeof ingredient == "string") {
+        s = ingredient[0] == "#" ? ingredient.substring(1) : ingredient;
+    } else {
+        s = ingredient.map((s: string) => s[0] == "#" ? {tag: s.substring(1)} : {item: s});
+    }
+
+    const data = {
+        type: type || "smelting",
+        ingredient: s,
+        result: result,
+        cookingtime: cookingtime
+    };
+    if (group) data["group"] = group;
+    if (experience) data["experience"] = experience;
+    await add("recipe", id, data);
+}
+
+export async function addSmithingRecipe(id: string, base: string, addition: string, result: string, group?: string) {
+    const data = {
+        type: "smithing",
+        base: base[0] == "#" ? base.substring(1) : base,
+        addition: addition[0] == "#" ? addition.substring(1) : addition,
+        result: result
+    };
+    if (group) data["group"] = group;
+    await add("recipe", id, data);
+}
+
+export async function addStonecuttingRecipe(id: string, ingredient: string | string[], result: string, count: number = 1, group?: string) {
+    let s;
+    if (typeof ingredient == "string") {
+        s = ingredient[0] == "#" ? ingredient.substring(1) : ingredient;
+    } else {
+        s = ingredient.map((s: string) => s[0] == "#" ? {tag: s.substring(1)} : {item: s});
+    }
+
+    const data = {
+        type: "stonecutting",
+        ingredient: s,
+        result: result,
+        count: count
+    };
+    if (group) data["group"] = group;
+    await add("recipe", id, data);
 }
 
 /**

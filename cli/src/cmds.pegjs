@@ -15,7 +15,7 @@
 start
     = tokens:token* {
         // Return only tokens that are truthy
-        return tokens.filter(e => e);
+        tokens.filter(e => e).flat(1);
     }
 
 token
@@ -57,6 +57,10 @@ cmd
         };
     }
     // Function calls
+    // / name:$([a-zA-Z0-9$_\-]+) "(" args:(_? (number / iexpr) _? ","?)* _? ")" {
+    //     const cmds = [];
+    //     for ()
+    // }
 
 
 
@@ -94,13 +98,23 @@ range
     }
 
 list
-    = "[" __? ([A-Z] ";")? args:(__? val ","?)* __? end:"]"? {
+    = "[" __? ([A-Z] ";")? args:(__? (selector / val) ","?)* __? end:"]"? {
         if (!end) expected('] to end list');
         return unroll(null, args, 1);
     }
+state
+    = "[" __? vals:(__? (string / $([A-Za-z0-9$_\-]+)) _? [:=] __? (val / selector) ","?)* __? end:"]"? {
+        if (!end) expected("character to end dictionary");
+        
+        const obj = {};
+        for (const val of vals) {
+            obj[val[1]] = val[5];
+        }
+        return obj;
+    }
 dict
     = "{" __? vals:(__? (string / $([A-Za-z0-9$_\-]+)) _? [:=] __? (val / selector) ","?)* __? end:"}"? {
-        if (!end) expected(String.fromCharCode(123) + " to end dictionary");
+        if (!end) expected("character to end dictionary");
         
         const obj = {};
         for (const val of vals) {
@@ -177,6 +191,10 @@ arg
     // Selector
     / selector
     // TODO: mixed type arguments, like id[state]{nbt}, id[state], or id{nbt} AND other path arguments too! GREAT. These things suck btw
+    / item:$([A-Za-z0-9#:_+/\\\-]+) state:state? nbt:dict? &sep {
+        if (!state && !nbt) return item;
+        return new JointItem(item, state, nbt);
+    }
     // All values work as arguments
     / val
 

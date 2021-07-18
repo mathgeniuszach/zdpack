@@ -2,10 +2,7 @@ import {registerCmd, addRawCmds, compileCmds, stringify, parseExpr, state, Selec
 
 // The say command, by default works generally how you'd expect, except newline characters create more than one say command
 registerCmd("say", (...args) => {
-    const lines = [];
-    for (const arg of args) {
-        lines.push(...stringify(arg, false).split(/[\r\n|\r|\n]/g));
-    }
+    const lines = args.map(arg => stringify(arg, false)).join(" ").split(/[\r\n|\r|\n]/g);
     return lines.map((line) => `say ${line}`);
 });
 
@@ -74,7 +71,7 @@ registerCmd("$", async (...args) => {
 });
 
 const conditional = async (...args) => {
-    if (args.length < 2 || 5 < args.length) throw Error(`invalid arguments for ${this ? "if" : "unless"} command`);
+    if (args.length < 2 || 5 < args.length) throw Error(`invalid arguments for ${this ? "unless" : "if"} command`);
 
     // Check for else statement (if found, the condition is cached)
     let elseCode = null;

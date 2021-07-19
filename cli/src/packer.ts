@@ -295,26 +295,29 @@ export async function pack(ioptions, ibar) {
 
     // Run ready in javascript file
     if (options.js) {
-        console.log("Loading JavaScript file");
+        console.log("Running ready in JavaScript file");
 
         const cwd = process.cwd();
         process.chdir(tempOut);
         if (js.ready) await js.ready();
         await zdpack.finalize(); // Finalize variables and stuffs
         process.chdir(cwd);
-
     }
 
     if (options.output !== "NUL") {
         // Export to folder or zip
         if (options.folder) {
             if (await fs.existsSync(options.output)) await fs.rm(options.output, {recursive: true});
+            else await fs.ensureDir(options.output);
             await fs.move(tempOut, options.output);
         } else {
             // For some reason, this zipping library requires us to move the temp folder once for no reason at all.
             const id = nid(8);
             await fs.move(tempOut, id);
-            await zipdir(id, {saveTo: options.output + (isZip ? ".zip" : ".jar")});
+
+            const fout = options.output + (isZip ? ".zip" : ".jar");
+            await fs.ensureFile(fout);
+            await zipdir(id, {saveTo: fout});
 
             await fs.rm(id, {recursive: true});
         }

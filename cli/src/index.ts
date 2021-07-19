@@ -122,7 +122,7 @@ export function resolveID(type: string, id: string, ext: string = ".json", root:
 
     const parts = id.split(/:/g);
     if (parts.length < 2) parts.unshift("minecraft");
-    return path.join(root, parts[0], type, parts[1]) + (path.extname(id) ? "" : ext);
+    return path.join(process.cwd(), root, parts[0], type, parts[1]) + (path.extname(id) ? "" : ext);
 }
 
 /**
@@ -441,7 +441,7 @@ export function parseCmds(data: string): {[key: string]: any}[] {
  */
 export async function addCmds(id: string, data: string | {[key: string]: any}[], append: boolean = false, raw: boolean = false) {
     const code = raw ? data : (await compileCmds(data)).join("\n");
-    state.ucmds = true;
+    if (!raw) state.ucmds = true;
 
     // Finally write the code to the file
     const loc = resolveID("functions", id, ".mcfunction");

@@ -308,7 +308,7 @@ export async function pack(ioptions, ibar) {
         // Export to folder or zip
         if (options.folder) {
             if (await fs.existsSync(options.output)) await fs.rm(options.output, {recursive: true});
-            else await fs.ensureDir(options.output);
+            else await fs.ensureDir(path.dirname(options.output));
             await fs.move(tempOut, options.output);
         } else {
             // For some reason, this zipping library requires us to move the temp folder once for no reason at all.

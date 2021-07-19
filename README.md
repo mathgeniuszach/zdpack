@@ -19,15 +19,15 @@ To see all command line options, use `zdpack -h`.
 
 This command will merge the datapacks `a.zip` and `b.zip` into the datapack `c.zip` in the current directory (with a pack.mcmeta file set to the version of 1.16.5):
 
-`zdpack -m 6 -p a.zip b.zip -o c`
+`zdpack -v 6 -p a.zip b.zip -o c`
 
 This command will convert the datapack `a.zip` into a mod `a.jar` in the current directory that works in both fabric and forge:
 
-`zdpack -m 6 -t mod -p a.zip -o a`
+`zdpack -v 6 -t mod -p a.zip -o a`
 
 This command will generate a bare bones datapack and run a javascript file to do the rest of the work; keep in mind that it will need a node_modules folder with the zdpack module inside if you want it to use zdpack functions:
 
-`zdpack -m 6 -j build.js`
+`zdpack -v 6 -j build.js`
 
 ## Video Explanation
 

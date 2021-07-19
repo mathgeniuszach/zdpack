@@ -25,7 +25,7 @@ This command will convert the datapack `a.zip` into a mod `a.jar` in the current
 
 `zdpack -m 1.16.5 -t mod -p a.zip -o a`
 
-This command will generate a bare bones datapack and run a javascript file to do the rest of the work; keep in mind that it will need a node_modules folder with zdpack inside if you want it to use zdpack functions:
+This command will generate a bare bones datapack and run a javascript file to do the rest of the work; keep in mind that it will need a node_modules folder with the zdpack module inside if you want it to use zdpack functions:
 
 `zdpack -m 1.16.5 -j build.js`
 

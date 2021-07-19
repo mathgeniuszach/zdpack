@@ -37,7 +37,11 @@ window.addEventListener("DOMContentLoaded", () => {
     for (const input of document.querySelectorAll("input")) {
         input.setAttribute("spellcheck", "false");
         input.onchange = function () {
-            options[this.id] = this.value;
+            if (this.value !== "") {
+                options[this.id] = this.value;
+            } else {
+                delete options[this.id];
+            }
         };
     }
 
@@ -79,6 +83,7 @@ window.addEventListener("DOMContentLoaded", () => {
             finalizer.setAttribute("disabled", "");
 
             if (!options.output) options.output = "pack";
+            console.log(options);
             await pack(JSON.parse(JSON.stringify(options)), new GUIBar()); // Copies options to stop any race conditions
 
             await dialog.showMessageBox(app.win, {
@@ -121,7 +126,6 @@ window.addEventListener("DOMContentLoaded", () => {
                 div.querySelector("button").onclick = function () {
                     const item = this.parentElement;
                     const index = Array.prototype.indexOf.call(item.parentElement, item);
-                    console.log(item.parentElement.id);
 
                     const array = options[item.parentElement.parentElement.id];
                     array.splice(index, 1);

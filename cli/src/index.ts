@@ -17,12 +17,15 @@ export const state = {
     // n and x value for compiled expressions (n is reset, x is not)
     n: 0,
     x: 0,
-    // randomly generated namespace to put auto-generated functions in so they don't conflict with anything.
+    // Randomly generated namespace to put auto-generated functions in so they don't conflict with anything.
     rng: "f" + nid(10),
 
     // Registered custom commands
     cmds: new Set(["ability","advancement","agent","allowlist","alwaysday","attribute","ban","ban-ip","banlist","bossbar","camerashake","changesetting","classroommode","clear","clearspawnpoint","clone","closechat","closewebsocket","code","codebuilder","connect","data","datapack","daylock","debug","dedicatedwsserver","defaultgamemode","deop","dialogue","difficulty","effect","enableencryption","enchant","event","execute","experience","fill","fog","forceload","function","gamemode","gamerule","gametest","getchunkdata","getchunks","geteduclientinfo","geteduserverinfo","getlocalplayername","getspawnpoint","gettopsolidblock","give","globalpause","help","immutableworld","item","kick","kill","lesson","list","listd","locate","locatebiome","loot","me","mobevent","msg","music","op","ops","pardon","pardon-ip","particle","permission","playanimation","playsound","publish","querytarget","recipes","reload","remove","replaceitem","ride","save","save-all","save-off","save-on","say","schedule","scoreboard","seed","setblock","setidletimeout","setmaxplayers","setworldspawn","spawnitem","spawnpoint","spectate","spreadplayers","stop","stopsound","structure","summon","tag","takepicture","team","teammsg","teleport","tell","tellraw","testfor","testforblock","testforblocks","tickingarea","time","title","titleraw","tm","toggledownfall","tp","trigger","videostream","w","wb","weather","whitelist","worldborder","worldbuilder","wsserver","xp","achievement","banip","blockdata","broadcast","chunk","clearfixedinv","detect","entitydata","executeasself","home","position","mixer","resupply","say","setfixedinvslot","setfixedinvslots","setspawn","solid","stats","toggledownfall","transferserver","unban"]),
     callbacks: {},
+
+    // Whether or not we are using commands and need to generate stuff
+    ucmds: false
 };
 
 export class Selector {
@@ -438,6 +441,7 @@ export function parseCmds(data: string): {[key: string]: any}[] {
  */
 export async function addCmds(id: string, data: string | {[key: string]: any}[], append: boolean = false, raw: boolean = false) {
     const code = raw ? data : (await compileCmds(data)).join("\n");
+    state.ucmds = true;
 
     // Finally write the code to the file
     const loc = resolveID("functions", id, ".mcfunction");
@@ -462,12 +466,14 @@ export async function addRawCmds(id: string, data: string, append: boolean = fal
  */
 export async function finalize() {
     // Create load function to auto-create necessary variables
-    const loc = `${state.rng}:load`;
-    await addTag("functions", "minecraft:load", [loc]);
-    await addRawCmds(loc,
-        [...state.vars].map((v) => `scoreboard objectives remove ${v}\nscoreboard objectives add ${v} dummy`).join("\n") + "\n" +
-        [...state.consts].map((v) => `scoreboard players set ${v} __temp__ ${v}`).join("\n"),
-    );
+    if (state.ucmds) {
+        const loc = `${state.rng}:load`;
+        await addTag("functions", "minecraft:load", [loc]);
+        await addRawCmds(loc,
+            [...state.vars].map((v) => `scoreboard objectives remove ${v}\nscoreboard objectives add ${v} dummy`).join("\n") + "\n" +
+            [...state.consts].map((v) => `scoreboard players set ${v} __temp__ ${v}`).join("\n"),
+        );
+    }
 }
 
 import {parseExpr as p1} from "./expr";

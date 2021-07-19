@@ -190,11 +190,6 @@ arg
     }
     // Selector
     / selector
-    // TODO: mixed type arguments, like id[state]{nbt}, id[state], or id{nbt} AND other path arguments too! GREAT. These things suck btw
-    / item:$([A-Za-z0-9#:_+/\\\-]+) state:state? nbt:dict? &sep {
-        if (!state && !nbt) return item;
-        return new JointItem(item, state, nbt);
-    }
     // All values work as arguments
     / val
 

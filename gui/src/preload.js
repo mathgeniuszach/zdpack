@@ -53,7 +53,7 @@ window.addEventListener("DOMContentLoaded", () => {
     // Implement functionality of locator/saver buttons
     for (const btn of document.querySelectorAll(".saver")) {
         btn.onclick = async () => {
-            let v = (await dialog.showSaveDialog(app.win, {title: " "})).filePaths[0];
+            let v = (await dialog.showSaveDialog(app.win, {title: " "})).filePath;
             if (!v) return;
             if (btn.hasAttribute("noext") && v.includes(".")) v = v.substring(0, v.lastIndexOf("."));
 

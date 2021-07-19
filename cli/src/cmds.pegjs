@@ -15,7 +15,7 @@
 start
     = tokens:token* {
         // Return only tokens that are truthy
-        tokens.filter(e => e).flat(1);
+        return tokens.filter(e => e).flat(1);
     }
 
 token

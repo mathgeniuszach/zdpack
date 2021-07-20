@@ -31,7 +31,7 @@ This command will generate a bare bones datapack and run a javascript file to do
 
 ## Video Explanation
 
-Coming Soon!
+https://www.youtube.com/watch?v=aJVh7EWiWgI
 
 ## CommandScript
 

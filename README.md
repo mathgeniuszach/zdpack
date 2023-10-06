@@ -11,6 +11,6 @@ I've decided to discontinue this project for a few reasons:
 
 This was a hard decision as this was one of my most starred repositories, but I personally feel it's best to just discontinue it at this point. I won't ever delete the repository but I'm going to stop working on it from now on.
 
-## Social
+## Contact
 
-[Discord](https://discord.gg/pBFqEcXvW5)
+Contact me on [Discord](https://discord.gg/pBFqEcXvW5) and support me on [Ko-Fi](https://ko-fi.com/mathgeniuszach)!
